@@ -137,7 +137,7 @@ void opcontrol() {
         int rightY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
         // move the robot
-        chassis.tank(leftY, rightY);
+        chassis.arcade(leftY, rightY);
 
         // delay to save resources
         pros::delay(25);
