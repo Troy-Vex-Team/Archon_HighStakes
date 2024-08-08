@@ -1,5 +1,12 @@
 #include "main.h"
 
+// define all objects
+pros::Controller controller(pros::E_CONTROLLER_MASTER);
+pros::MotorGroup rightDrive({4, 5, -11}, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations); 
+pros::MotorGroup leftDrive({-1, 2, -3}, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations); 
+pros::Motor intake(-21, pros::v5::MotorGears::green, pros::v5::MotorUnits::rotations);
+pros::Motor elevator(-20, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations);
+pros::adi::Pneumatics mogomech(1, true);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -7,6 +14,11 @@
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "TYPE SHI");
+	
+	rightDrive.set_brake_mode_all(pros::MotorBrake::coast);
+	leftDrive.set_brake_mode_all(pros::MotorBrake::coast);
+	intake.set_brake_mode(pros::MotorBrake::coast);
+	elevator.set_brake_mode(pros::MotorBrake::brake);
 }
 
 void disabled() {} // disregard don't delete
@@ -42,12 +54,6 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Controller controller(pros::E_CONTROLLER_MASTER);
-	pros::MotorGroup rightDrive({4, 5, -11}, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations); 
-	pros::MotorGroup leftDrive({-1, 2, -3}, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations); 
-	pros::Motor intake(-21, pros::v5::MotorGears::green, pros::v5::MotorUnits::rotations);
-	pros::Motor elevator(-20, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations);
-	pros::adi::Pneumatics mogomech(1, true);
 
 	while (true) {
 
