@@ -1,13 +1,27 @@
 #include "main.h"
 #include "lemlib/api.hpp"
+#include "lemlib/chassis/trackingWheel.hpp"
+#include "pros/abstract_motor.hpp"
+#include "pros/motor_group.hpp"
 
-// define all objects
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
-pros::MotorGroup rightDrive({4, 5, -11}, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations); 
-pros::MotorGroup leftDrive({-1, 2, -3}, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations); 
+pros::MotorGroup leftMotors({-1, 2, -3}, pros::MotorGearset::blue); 
+pros::MotorGroup rightMotors({5, -4, -11}, pros::MotorGearset::blue); 
 pros::Motor intake(-21, pros::v5::MotorGears::green, pros::v5::MotorUnits::rotations);
 pros::Motor elevator(-20, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations);
 pros::adi::Pneumatics mogomech(1, true);
+
+pros::Imu imu(10);
+pros::Rotation verticalSensor(8);
+pros::Rotation horizontalSensor(9);
+
+//drivetrain settings
+lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 
+                              11.22, 
+                              lemlib::Omniwheel::NEW_325, 
+                              360, 
+                              2
+);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -16,8 +30,6 @@ void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "TYPE SHI");
 	
-	rightDrive.set_brake_mode_all(pros::MotorBrake::coast);
-	leftDrive.set_brake_mode_all(pros::MotorBrake::coast);
 	intake.set_brake_mode(pros::MotorBrake::coast);
 	elevator.set_brake_mode(pros::MotorBrake::brake);
 }
@@ -57,11 +69,19 @@ void autonomous() {}
 void opcontrol() {
 
 	while (true) {
+		
+        // get left y and right y positions
+        int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
-		int dir = controller.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
-		int turn = controller.get_analog(ANALOG_RIGHT_Y);  // Gets the turn left/right from right joystick
-		leftDrive.move(dir*.6);
-		rightDrive.move(turn*.6); 
+        // move the robot
+        chassis.tank(leftY, rightY);
+
+        // delay to save resources
+        pros::delay(25);
+
+
+		//intake R1
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 			intake.move(100);
 			elevator.move(100);
@@ -69,6 +89,7 @@ void opcontrol() {
 			intake.move(0);
 			elevator.move(0);
 		}
+		//mogomech pneumatics L1, L2
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			mogomech.extend();
 		} 
