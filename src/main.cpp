@@ -1,8 +1,5 @@
 #include "main.h"
 #include "lemlib/api.hpp"
-#include "lemlib/chassis/trackingWheel.hpp"
-#include "pros/abstract_motor.hpp"
-#include "pros/motor_group.hpp"
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup leftMotors({-1, 2, -3}, pros::MotorGearset::blue); 
