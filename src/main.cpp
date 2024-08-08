@@ -11,10 +11,9 @@ pros::adi::Pneumatics mogomech(1, true);
 pros::Imu imu(10);
 pros::Rotation verticalEnc(8);
 pros::Rotation horizontalEnc(9);
+
 // tracking wheels
-// horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, -5.75);
-// vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, -2.5);
 
 //drivetrain settings
@@ -90,6 +89,7 @@ void initialize() {
 	intake.set_brake_mode(pros::MotorBrake::coast);
 	elevator.set_brake_mode(pros::MotorBrake::brake);
         pros::delay(50); //delay
+	}
 }
 
 void disabled() {} // disregard don't delete
@@ -98,33 +98,11 @@ void competition_initialize() {
 	//initialize sensors + autonomous selector here
 }
 
-/**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
-void autonomous() {}
+void autonomous() {
 	chassis.setPose(0,0,0);
 	chassis.turnToHeading(90,100000);
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
+}
+
 void opcontrol() {
 
 	while (true) {
