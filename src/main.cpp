@@ -1,4 +1,5 @@
 #include "main.h"
+#include "lemlib/api.hpp"
 
 // define all objects
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
