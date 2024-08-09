@@ -78,18 +78,8 @@ void initialize() {
 	chassis.calibrate(); // calibrate sensors
 	pros::lcd::set_text(1, "TYPE SHI");
 
-	while (true) {
-            // print robot location to the brain screen
-            pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
-            pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
-            pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            // log position telemetry
-            lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
-
 	intake.set_brake_mode(pros::MotorBrake::coast);
 	elevator.set_brake_mode(pros::MotorBrake::brake);
-        pros::delay(50); //delay
-	}
 }
 
 void disabled() {} // disregard don't delete
@@ -109,10 +99,10 @@ void opcontrol() {
 		
         // get left y and right y positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
         // move the robot
-        chassis.arcade(leftY, rightY);
+        chassis.arcade(leftY, rightX, false, .75);
 
         // delay to save resources
         pros::delay(25);
