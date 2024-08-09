@@ -99,10 +99,10 @@ void opcontrol() {
 		
         // get left y and right y positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
         // move the robot
-        chassis.arcade(leftY, rightX, false, .75);
+        chassis.tank(leftY, rightX);
 
         // delay to save resources
         pros::delay(25);
