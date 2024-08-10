@@ -3,7 +3,7 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup leftMotors({-1, 2, -3}, pros::MotorGearset::blue); 
-pros::MotorGroup rightMotors({5, -4, -11}, pros::MotorGearset::blue); 
+pros::MotorGroup rightMotors({5, 4, -11}, pros::MotorGearset::blue); 
 pros::Motor intake(-21, pros::v5::MotorGears::green, pros::v5::MotorUnits::rotations);
 pros::Motor elevator(-20, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations);
 pros::adi::Pneumatics mogomech(1, true);
@@ -99,10 +99,10 @@ void opcontrol() {
 		
         // get left y and right y positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
         // move the robot
-        chassis.tank(leftY, rightX);
+        chassis.arcade(leftY, rightX, false, 0.75);
 
         // delay to save resources
         pros::delay(25);
@@ -125,4 +125,5 @@ void opcontrol() {
 		}
 		pros::delay(20);                 
 	}
+	
 }
