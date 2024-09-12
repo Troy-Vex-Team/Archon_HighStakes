@@ -1,16 +1,22 @@
 #include "main.h"
 #include "lemlib/api.hpp"
+#include "pros/abstract_motor.hpp"
+#include "pros/adi.hpp"
+#include "pros/misc.h"
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
-pros::MotorGroup leftMotors({-1, 2, -3}, pros::MotorGearset::blue); 
-pros::MotorGroup rightMotors({5, 4, -11}, pros::MotorGearset::blue); 
-pros::Motor intake(-21, pros::v5::MotorGears::green, pros::v5::MotorUnits::rotations);
-pros::Motor elevator(-20, pros::v5::MotorGears::blue, pros::v5::MotorUnits::rotations);
-pros::adi::Pneumatics mogomech(1, true);
+pros::MotorGroup leftMotors({-2, 1, -3}, pros::MotorGearset::blue); 
+pros::MotorGroup rightMotors({11, 12, -13}, pros::MotorGearset::blue); 
 
-pros::Imu imu(10);
-pros::Rotation verticalEnc(8);
-pros::Rotation horizontalEnc(9);
+pros::Motor intake(14, pros::MotorGears::green, pros::v5::MotorUnits::rotations);
+pros::Motor chain(-19, pros::MotorGears::blue, pros::MotorUnits::rotations);
+pros::Motor lift(-21, pros::MotorGears::green, pros::v5::MotorEncoderUnits::rotations);
+pros::adi::Pneumatics mogomech(1, true);
+pros::adi::Pneumatics release(2, false);
+
+pros::Imu imu(4);
+pros::Rotation verticalEnc(16);
+pros::Rotation horizontalEnc(15);
 
 // tracking wheels
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, -5.75);
@@ -70,16 +76,16 @@ lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
 
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-/**
- * Runs initialization code. This occurs as soon as the program is started.
- */
+//Runs initialization code. This occurs as soon as the program is started.
+
 void initialize() {
 	pros::lcd::initialize();
 	chassis.calibrate(); // calibrate sensors
-	pros::lcd::set_text(1, "TYPE SHI");
+	pros::lcd::set_text(1, "Ready");
 
 	intake.set_brake_mode(pros::MotorBrake::coast);
-	elevator.set_brake_mode(pros::MotorBrake::brake);
+	chain.set_brake_mode(pros::MotorBrake::brake);
+    lift.set_brake_mode(pros::MotorBrake::brake);
 }
 
 void disabled() {} // disregard don't delete
@@ -99,10 +105,10 @@ void opcontrol() {
 		
         // get left y and right y positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
         // move the robot
-        chassis.arcade(leftY, rightX, false, 0.75);
+        chassis.tank(leftY*.850, rightX*.85);
 
         // delay to save resources
         pros::delay(25);
@@ -111,18 +117,33 @@ void opcontrol() {
 		//intake R1
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 			intake.move(100);
-			elevator.move(100);
+			chain.move(100);
 		} else {
 			intake.move(0);
-			elevator.move(0);
+			chain.move(0);
 		}
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+            chain.move(-75);
+        }
+        //lift
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+            lift.move(50);
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+            lift.move(-50);
+        } else {
+            lift.move(0);
+        }
 		//mogomech pneumatics L1, L2
-		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			mogomech.extend();
 		} 
-		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			mogomech.retract();
 		}
+        //release pneumatics x buttom
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+            release.extend();
+        }
 		pros::delay(20);                 
 	}
 	
