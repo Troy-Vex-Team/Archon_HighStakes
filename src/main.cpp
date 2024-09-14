@@ -101,6 +101,7 @@ void autonomous() {
 
 void opcontrol() {
     bool mogo = true;
+    bool last_L1_state = false; 
 	while (true) {
 		
         // get left y and right y positions
@@ -128,13 +129,20 @@ void opcontrol() {
         //lift
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
             lift.move(100);
+
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+            lift.move(-100);
         } else {
             lift.move(0);
         }
+        bool L2State = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
 		//mogomech pneumatics L1
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-            mogomech.toggle();   
+        bool current_L1_state = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
+        if (current_L1_state && !last_L1_state) {
+            mogomech.toggle(); 
         }
+        last_L1_state = current_L1_state; 
+
         //release pneumatics x buttom
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
             release.extend();
