@@ -95,8 +95,7 @@ void competition_initialize() {
 }
 
 void autonomous() {
-	chassis.setPose(0,0,0);
-	chassis.turnToHeading(90,100000);
+
 }
 
 void opcontrol() {
