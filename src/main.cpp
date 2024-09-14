@@ -100,7 +100,7 @@ void autonomous() {
 }
 
 void opcontrol() {
-
+    bool mogo = true;
 	while (true) {
 		
         // get left y and right y positions
@@ -108,7 +108,7 @@ void opcontrol() {
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
         // move the robot
-        chassis.tank(leftY*.850, rightX*.85);
+        chassis.tank(leftY*.95, rightX*.95);
 
         // delay to save resources
         pros::delay(25);
@@ -126,20 +126,15 @@ void opcontrol() {
             chain.move(-75);
         }
         //lift
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-            lift.move(50);
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-            lift.move(-50);
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+            lift.move(100);
         } else {
             lift.move(0);
         }
-		//mogomech pneumatics L1, L2
-		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			mogomech.extend();
-		} 
-		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			mogomech.retract();
-		}
+		//mogomech pneumatics L1
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+            mogomech.toggle();   
+        }
         //release pneumatics x buttom
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
             release.extend();
