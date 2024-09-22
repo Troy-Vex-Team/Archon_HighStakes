@@ -100,6 +100,7 @@ void autonomous() {
    	// turn to face heading 90 with a very long timeout
     	chassis.turnToHeading(90, 100000); // we using this to tune angle first today
 	//chassis.moveToPoint (10, 10, 0, 4000) //test lateral/angular together after
+	chassis.moveToPoint(10, 10, 100000);
 
 }
 
