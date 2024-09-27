@@ -1,8 +1,10 @@
 #include "main.h"
 #include "lemlib/api.hpp"
+#include "liblvgl/llemu.hpp"
 #include "pros/abstract_motor.hpp"
 #include "pros/adi.hpp"
 #include "pros/misc.h"
+#include <string>
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup leftMotors({-2, 1, -3}, pros::MotorGearset::blue); 
@@ -43,9 +45,9 @@ lemlib::ControllerSettings linearController(10, // proportional gain (kP)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angularController(2, // proportional gain (kP)
+lemlib::ControllerSettings angularController(0, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              10, // derivative gain (kD)
+                                              0, // derivative gain (kD)
                                               0, // anti windup
                                               0, // small error range, in degrees
                                               0, // small error range timeout, in milliseconds
@@ -81,11 +83,18 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 void initialize() {
 	pros::lcd::initialize();
 	chassis.calibrate(); // calibrate sensors
-	pros::lcd::set_text(1, "Ready");
-
+    
 	intake.set_brake_mode(pros::MotorBrake::coast);
 	chain.set_brake_mode(pros::MotorBrake::brake);
     lift.set_brake_mode(pros::MotorBrake::brake);
+
+    // set position to x:0, y:0, heading:0
+   	chassis.setPose(0, 0, 0);
+   	// turn to face heading 90 with a very long timeout
+    //chassis.turnToHeading(180, 5000); // we using this to tune angle first today
+
+	chassis.moveToPoint(0, 10, 5000);
+    
 }
 
 void disabled() {} // disregard don't delete
@@ -95,12 +104,7 @@ void competition_initialize() {
 }
 
 void autonomous() {
-    	// set position to x:0, y:0, heading:0
-   	chassis.setPose(0, 0, 0);
-   	// turn to face heading 90 with a very long timeout
-    	chassis.turnToHeading(90, 100000); // we using this to tune angle first today
-	//chassis.moveToPoint (10, 10, 0, 4000) //test lateral/angular together after
-	chassis.moveToPoint(10, 10, 100000);
+
 
 }
 
