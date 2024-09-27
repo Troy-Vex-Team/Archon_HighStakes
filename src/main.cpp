@@ -89,11 +89,11 @@ void initialize() {
     lift.set_brake_mode(pros::MotorBrake::brake);
 
     // set position to x:0, y:0, heading:0
-   	chassis.setPose(0, 0, 0);
+    //chassis.setPose(0, 0, 0);
    	// turn to face heading 90 with a very long timeout
     //chassis.turnToHeading(180, 5000); // we using this to tune angle first today
 
-	chassis.moveToPoint(0, 10, 5000);
+    //chassis.moveToPoint(0, 10, 5000);
     
 }
 
@@ -104,7 +104,6 @@ void competition_initialize() {
 }
 
 void autonomous() {
-
 
 }
 
