@@ -45,10 +45,10 @@ lemlib::ControllerSettings linearController(32.8, // proportional gain (kP)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angularController(6.2, // proportional gain (kP)
-                                              0, // integral gain (kI)
-                                              50.5, // derivative gain (kD)
-                                              0, // anti windup
+lemlib::ControllerSettings angularController(6.01, // proportional gain (kP)
+                                              1.015, // integral gain (kI)
+                                              48.75, // derivative gain (kD)
+                                              1.155, // anti windup
                                               0, // small error range, in degrees
                                               0, // small error range timeout, in milliseconds
                                               0, // large error range, in degrees
@@ -93,11 +93,9 @@ void initialize() {
     // set position to x:0, y:0, heading:0
     chassis.setPose(0, 0, 0);
    	// turn to face heading 90 with a very long timeout
-    chassis.turnToHeading(90,2000);
-    chassis.turnToHeading(0, 5000); 
-    //chassis.turnToHeading(180, 100000); 
-
-    //chassis.moveToPose(0, 0, 90, 10000);
+    //chassis.turnToHeading(90, 2000); 
+    chassis.moveToPoint(0, 48, 10000);
+    
     while (1) {
             pros::lcd::print(3, "%f Heading", chassis.getPose().theta); 
             pros::lcd::print(1, "%f X", chassis.getPose().x); 
