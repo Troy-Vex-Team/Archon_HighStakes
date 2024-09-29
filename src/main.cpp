@@ -3,6 +3,7 @@
 #include "liblvgl/llemu.hpp"
 #include "pros/abstract_motor.hpp"
 #include "pros/adi.hpp"
+#include "pros/llemu.hpp"
 #include "pros/misc.h"
 #include <string>
 
@@ -21,8 +22,8 @@ pros::Rotation verticalEnc(-17);
 pros::Rotation horizontalEnc(15);
 
 // tracking wheels
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, .8);
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, .6);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 2);
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, .625);
 
 //drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 
@@ -44,9 +45,9 @@ lemlib::ControllerSettings linearController(32.8, // proportional gain (kP)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angularController(5.9, // proportional gain (kP)
+lemlib::ControllerSettings angularController(6.2, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              47.7, // derivative gain (kD)
+                                              50.5, // derivative gain (kD)
                                               0, // anti windup
                                               0, // small error range, in degrees
                                               0, // small error range timeout, in milliseconds
@@ -54,6 +55,8 @@ lemlib::ControllerSettings angularController(5.9, // proportional gain (kP)
                                               0, // large error range timeout, in milliseconds
                                               0 // maximum acceleration (slew)
 );
+
+//barely oscillates and undershoots: 5.9,0,50
 
 // input curve for throttle input during driver control
 lemlib::ExpoDriveCurve throttleCurve(3, // joystick deadband out of 127
@@ -90,11 +93,18 @@ void initialize() {
     // set position to x:0, y:0, heading:0
     chassis.setPose(0, 0, 0);
    	// turn to face heading 90 with a very long timeout
-    //chassis.turnToHeading(90,5000);
-    //chassis.turnToHeading(0, 5000); 
+    chassis.turnToHeading(90,2000);
+    chassis.turnToHeading(0, 5000); 
     //chassis.turnToHeading(180, 100000); 
 
-    chassis.moveToPose(0, 48, 0, 10000);
+    //chassis.moveToPose(0, 0, 90, 10000);
+    while (1) {
+            pros::lcd::print(3, "%f Heading", chassis.getPose().theta); 
+            pros::lcd::print(1, "%f X", chassis.getPose().x); 
+            pros::lcd::print(2, "%f Y", chassis.getPose().y);
+
+            pros::delay(500);
+        }
 }
 
 void disabled() {} // disregard don't delete
