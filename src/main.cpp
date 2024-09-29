@@ -30,18 +30,18 @@ lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
                               11.22, 
                               lemlib::Omniwheel::NEW_325, 
                               360, 
-                              2);
+                              8);
 
 // lateral PID controller
-lemlib::ControllerSettings linearController(32.8, // proportional gain (kP)
-                                            10, // integral gain (kI)
-                                            97, // derivative gain (kD)
-                                            0, // anti windup
-                                            5, // small error range, in inches
-                                            1000, // small error range timeout, in milliseconds
-                                            10, // large error range, in inches
-                                            2000, // large error range timeout, in milliseconds
-                                            0 // maximum acceleration (slew)
+lemlib::ControllerSettings linearController(10.02, // proportional gain (kP)
+                                            .72, // integral gain (kI)
+                                            35.45, // derivative gain (kD)
+                                            0.868125, // anti windup
+                                            1, // small error range, in inches
+                                            100, // small error range timeout, in milliseconds
+                                            3, // large error range, in inches
+                                            500, // large error range timeout, in milliseconds
+                                            20 // maximum acceleration (slew)
 );
 
 // angular PID controller
@@ -55,8 +55,6 @@ lemlib::ControllerSettings angularController(6.01, // proportional gain (kP)
                                               0, // large error range timeout, in milliseconds
                                               0 // maximum acceleration (slew)
 );
-
-//barely oscillates and undershoots: 5.9,0,50
 
 // input curve for throttle input during driver control
 lemlib::ExpoDriveCurve throttleCurve(3, // joystick deadband out of 127
@@ -94,7 +92,7 @@ void initialize() {
     chassis.setPose(0, 0, 0);
    	// turn to face heading 90 with a very long timeout
     //chassis.turnToHeading(90, 2000); 
-    chassis.moveToPoint(0, 48, 10000);
+    chassis.moveToPose(0, 48, 0, 3000);
     
     while (1) {
             pros::lcd::print(3, "%f Heading", chassis.getPose().theta); 
