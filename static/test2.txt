@@ -1,0 +1,25 @@
+-38.801, -41.209, 89.554
+-38.813, -39.209, 86.672
+-38.825, -37.209, 83.69
+-38.837, -35.209, 80.598
+-38.849, -33.209, 77.382
+-38.861, -31.209, 74.027
+-38.873, -29.209, 70.512
+-38.885, -27.21, 66.813
+-38.897, -25.21, 62.897
+-38.909, -23.21, 58.72
+-38.921, -21.21, 54.222
+-38.932, -19.21, 49.315
+-38.944, -17.21, 43.863
+-38.956, -15.21, 37.63
+-38.968, -13.21, 30.133
+-38.98, -11.21, 20
+-38.988, -9.803, 0
+-38.988, -9.803, 0
+-39.107, 10.196, 0
+endData
+127
+100
+200
+-38.801, -41.209, -38.895, -25.506, -38.895, -25.506, -38.988, -9.803
+#PATH.JERRYIO-DATA {"appVersion":"0.8.3","format":"LemLib v0.5","gc":{"robotWidth":16,"robotHeight":18,"robotIsHolonomic":false,"showRobot":false,"uol":2.54,"pointDensity":2,"controlMagnetDistance":1.968503937007874,"fieldImage":{"displayName":"V5RC 2025 - High Stakes (Skills)","signature":"V5RC 2025 - High Stakes (Skills)","origin":{"__type":"built-in"}},"coordinateSystem":"Path-Based Coordinates"},"paths":[{"segments":[{"controls":[{"uid":"1AwvWv2chR","x":-38.80147412858136,"y":-41.20927421904257,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"bo1jjLLDjU","x":-38.988415129393566,"y":-9.803186082592052,"lock":false,"visible":true,"heading":0,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Xe8JXegPXn"}],"pc":{"speedLimit":{"minLimit":{"value":0,"label":"0"},"maxLimit":{"value":127,"label":"127"},"step":1,"from":20,"to":100},"bentRateApplicableRange":{"minLimit":{"value":0,"label":"0"},"maxLimit":{"value":1,"label":"1"},"step":0.001,"from":0,"to":0.1},"maxDecelerationRate":127},"name":"Path","uid":"ZXmPf5a3XU","lock":false,"visible":true}]}

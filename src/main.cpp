@@ -78,7 +78,6 @@ lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
 
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-//Runs initialization code. This occurs as soon as the program is started.
 
 void initialize() {
 	pros::lcd::initialize();
@@ -88,19 +87,6 @@ void initialize() {
 	chain.set_brake_mode(pros::MotorBrake::brake);
 //  lift.set_brake_mode(pros::MotorBrake::brake);
 
-    // set position to x:0, y:0, heading:0
-    chassis.setPose(0, 0, 0);
-   	// turn to face heading 90 with a very long timeout
-    //chassis.turnToHeading(90, 2000); 
-    chassis.moveToPose(0, 48, 0, 3000);
-    
-    while (1) {
-            pros::lcd::print(3, "%f Heading", chassis.getPose().theta); 
-            pros::lcd::print(1, "%f X", chassis.getPose().x); 
-            pros::lcd::print(2, "%f Y", chassis.getPose().y);
-
-            pros::delay(500);
-        }
 }
 
 void disabled() {} // disregard don't delete
@@ -110,6 +96,15 @@ void competition_initialize() {
 }
 
 void autonomous() {
+    // set chassis pose
+    pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
+    chassis.setPose(0, 0, 0);
+    chassis.moveToPose(24, 36, 60, 4000);
+    chassis.moveToPose(24, 12, 0, 2000);
+    chassis.moveToPose(48, 36, 45, 2000);
+    chassis.turnToHeading(180, 1000);
+    chassis.moveToPose(48, 12, 180, 2000);
+    pros::lcd::print(1, "Autonomous Routine Finished");
 
 }
 
@@ -123,7 +118,7 @@ void opcontrol() {
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
         // move the robot
-        chassis.arcade(leftY*.95, rightX*.95);
+        chassis.arcade(leftY, rightX);
 
         // delay to save resources
         pros::delay(25);
