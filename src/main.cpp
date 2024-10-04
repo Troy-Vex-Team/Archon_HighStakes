@@ -1,10 +1,12 @@
 #include "main.h"
 #include "lemlib/api.hpp"
+#include "lemlib/chassis/chassis.hpp"
 #include "liblvgl/llemu.hpp"
 #include "pros/abstract_motor.hpp"
 #include "pros/adi.hpp"
 #include "pros/llemu.hpp"
 #include "pros/misc.h"
+#include "pros/rtos.hpp"
 #include <string>
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
@@ -48,7 +50,7 @@ lemlib::ControllerSettings linearController(10.02, // proportional gain (kP)
 lemlib::ControllerSettings angularController(6.01, // proportional gain (kP)
                                               1.015, // integral gain (kI)
                                               48.75, // derivative gain (kD)
-                                              1.155, // anti windup
+                                              1.5, // anti windup
                                               0, // small error range, in degrees
                                               0, // small error range timeout, in milliseconds
                                               0, // large error range, in degrees
@@ -87,6 +89,15 @@ void initialize() {
 	chain.set_brake_mode(pros::MotorBrake::brake);
 //  lift.set_brake_mode(pros::MotorBrake::brake);
 
+    while(1) {
+        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
+        pros::lcd::print(2, "%f x", chassis.getPose().x);
+        pros::lcd::print(3, "%f y", chassis.getPose().y);
+
+        pros::delay(500);
+    } 
+
+    
 }
 
 void disabled() {} // disregard don't delete
@@ -99,12 +110,27 @@ void autonomous() {
     // set chassis pose
     pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
     chassis.setPose(0, 0, 0);
-    chassis.moveToPose(24, 36, 60, 4000);
-    chassis.moveToPose(24, 12, 0, 2000);
-    chassis.moveToPose(48, 36, 45, 2000);
-    chassis.turnToHeading(180, 1000);
-    chassis.moveToPose(48, 12, 180, 2000);
+
+    intake.move(127);
+    chain.move(127);
+    pros::delay(600);
+    mogomech.extend();
+
+    chassis.moveToPoint(0, 13.5, 5000);
+    chassis.turnToHeading(270, 1000);
+    chassis.moveToPoint(20, 19.5, 4000, {.forwards = false}, false);
+    //pick up mogo #1
+    mogomech.retract();
+    chassis.moveToPoint(23, 19.5, 4000, {.forwards = false}, false);
+    chassis.turnToHeading(0, 1000);
+    chassis.moveToPoint(19, 40, 4000);
+
+    pros::delay(1000);
+    mogomech.retract();
+    chassis.moveToPose(24, 30, 0, 4000);
     pros::lcd::print(1, "Autonomous Routine Finished");
+    
+    
 
 }
 
