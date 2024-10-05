@@ -36,9 +36,9 @@ lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
 
 // lateral PID controller
 lemlib::ControllerSettings linearController(10.02, // proportional gain (kP)
-                                            .72, // integral gain (kI)
+                                            0.75, // integral gain (kI)
                                             35.45, // derivative gain (kD)
-                                            0.868125, // anti windup
+                                            1, // anti windup
                                             1, // small error range, in inches
                                             100, // small error range timeout, in milliseconds
                                             3, // large error range, in inches
@@ -89,6 +89,8 @@ void initialize() {
 	chain.set_brake_mode(pros::MotorBrake::brake);
 //  lift.set_brake_mode(pros::MotorBrake::brake);
 
+    chassis.moveToPoint(0, 24, 4000);
+    
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
         pros::lcd::print(2, "%f x", chassis.getPose().x);
@@ -116,18 +118,70 @@ void autonomous() {
     pros::delay(600);
     mogomech.extend();
 
-    chassis.moveToPoint(0, 13.5, 5000);
+    //start code here 
+    chassis.moveToPoint(0, 12, 4000);
     chassis.turnToHeading(270, 1000);
-    chassis.moveToPoint(20, 19.5, 4000, {.forwards = false}, false);
-    //pick up mogo #1
-    mogomech.retract();
-    chassis.moveToPoint(23, 19.5, 4000, {.forwards = false}, false);
+    chassis.moveToPoint(15, 14.5, 4000, {.forwards = false}, false);
+    // was 7.25 before
+    //pick up mogo one
+    chassis.moveToPoint(7.75, 14.5, 4000, {.forwards = false}, false);
     chassis.turnToHeading(0, 1000);
-    chassis.moveToPoint(19, 40, 4000);
+    chassis.moveToPoint(4.5, 10.5, 4000);
+    chassis.moveToPoint(5.5, 32.75, 4000);
+    chassis.turnToHeading(58.75, 1000);
+    chassis.moveToPoint(37.25, 59, 4000);
+    chassis.moveToPoint(29, 52.5, 4000, {.forwards = false}, false);
+    chassis.turnToHeading(184, 1000);
+    chassis.moveToPoint(28, 6, 4000);
+    chassis.moveToPoint(28.25, 8.25, 4000, {.forwards = false}, false);
+    chassis.turnToHeading(146.5, 1000);
+    chassis.moveToPoint(31.75, -5, 4000);
+    chassis.turnToHeading(339.25, 1000);
+    chassis.moveToPoint(33.5, -13.25, 4000);
+    //score mogoone
+    chassis.moveToPose( -26, -7, -263.75, 4000);
+    //pickup mogo
+    chassis.moveToPoint(-33, -7, 4000, {.forwards = false}, false);
+    chassis.turnToHeading(-371.75, 1000);
+    chassis.moveToPose( -30, 10, -368.75, 4000);
+    chassis.moveToPose( -56.75, 40.75, -406.75, 4000);
+    chassis.turnToHeading(-553, 1000);
+    chassis.moveToPoint(-54.25, 28.25, 4000);
+    chassis.moveToPose( -58.25, -6.5, -528, 4000);
+    chassis.moveToPose( -64.75, -3, -393.5, 4000);
+    chassis.moveToPose( -76.5, -10.5, -315.5, 4000);
+    //stop intake
+    chassis.moveToPose( -50, 43, -346, 4000);
+    chassis.turnToHeading(-313, 1000);
+    chassis.moveToPoint(-31.25, 64.75, 4000);
+    chassis.moveToPose(-23.4, 73.75, -494.5, 4000);
+    chassis.moveToPoint(-23.25, 73.75, 4000, {.forwards = false}, false);
+    chassis.moveToPose(-68.5, 69.5, -432.25, 4000);
+    chassis.moveToPose(-32.0, 73.5, -250.5, 4000);
+    chassis.turnToHeading(-212.75, 1000);
+    chassis.moveToPoint(-8, 44, 4000);
+    chassis.turnToHeading(-250, 1000);
+    chassis.moveToPoint(12.75, 30, 4000);
+    chassis.turnToHeading(-429.5, 1000);
+    //drop mogo #3
+    chassis.moveToPose(-16, 74.5, -338.25, 4000);
+    chassis.turnToHeading(-427, 1000);
+    chassis.moveToPoint(-2, 75, 4000);
+    //pickup mogo #4
+    chassis.turnToHeading(-438, 1000);
+    //drop mogo
+    chassis.moveToPoint(1.75, 76.5, 4000);
+    chassis.moveToPose(-42.75, 93.5, -422.5, 4000);
+    chassis.moveToPose(-49.75, 95.75, -242.5, 4000);
+    chassis.moveToPoint(-51.75, 97, 4000);
+    //pickup mogo #5
+    chassis.moveToPose(-55.25, 100.25, -230, 4000);
+    //drop mogo #5
+    chassis.moveToPose(-36.25, 77, -152.25, 4000);
 
-    pros::delay(1000);
-    mogomech.retract();
-    chassis.moveToPose(24, 30, 0, 4000);
+
+
+    //end code here 
     pros::lcd::print(1, "Autonomous Routine Finished");
     
     
