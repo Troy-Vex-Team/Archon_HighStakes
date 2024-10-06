@@ -85,7 +85,7 @@ void checkIntakeChain(){
     if (chain.get_voltage() > 0 && chain.get_actual_velocity() < 25) {
         chain.move_relative(-1, 600);
     }
-    chain.move(127);
+    chain.move(110);
 }
 
 void initialize() {
@@ -103,8 +103,8 @@ void initialize() {
         pros::lcd::print(3, "%f y", chassis.getPose().y);
 
         pros::delay(500);
-    } */
-
+    } 
+    */
     
 }
 
@@ -142,14 +142,34 @@ void autonomous() {
     chassis.moveToPoint(45, 12.75, 4000, {.maxSpeed = 40});
     checkIntakeChain();
     chassis.moveToPose(30, 25, 90, 4000,{.forwards = false, .maxSpeed = 70});    
-    chassis.moveToPoint(48, 16, 4000,{.maxSpeed = 50});
+    chassis.moveToPoint(46, 16, 4000,{.maxSpeed = 50});
     checkIntakeChain();
-    chassis.turnToHeading(-22, 1000,{.maxSpeed = 90});
+    chassis.turnToHeading(-22, 1000,{.maxSpeed = 70});
     chassis.moveToPoint(63, 1, 4000, {.forwards = false, .maxSpeed = 70}, false);
     //drop mogo 1
     mogomech.retract();
 
     //3rd quadrant
+    chassis.moveToPose(20, 11, 90, 5000);
+    chassis.moveToPoint(-29, 15, 4000, {.forwards = false, .maxSpeed = 55}, false);
+    //pick up mogo 2
+    mogomech.extend();
+    pros::delay(300);
+    chassis.turnToHeading(0, 1000, {.maxSpeed = 90});
+    chassis.moveToPoint(-23.5, 42, 4000, {.maxSpeed = 55}, false);
+    pros::delay(500);
+    chassis.turnToHeading(-56.5, 1000, {.maxSpeed = 90});
+    chassis.moveToPoint(-52, 64, 4000, {.maxSpeed = 55});
+    chassis.moveToPoint(-37, 60, 4000, {.forwards = false, .maxSpeed = 55});
+    chassis.turnToHeading(-180, 1000, {.maxSpeed = 50});
+    chassis.moveToPoint(-45, 12.75, 4000, {.maxSpeed = 40});
+    checkIntakeChain();
+    chassis.moveToPose(-30, 25, -90, 4000,{.forwards = false, .maxSpeed = 70});    
+    chassis.moveToPoint(-48, 16, 4000,{.maxSpeed = 50});
+    checkIntakeChain();
+    chassis.turnToHeading(22, 1000,{.maxSpeed = 70});
+    chassis.moveToPoint(-63, 1, 4000, {.forwards = false, .maxSpeed = 70}, false);
+    //drop mogo 2
 
     //end code here 
     pros::lcd::print(1, "Autonomous Routine Finished");
@@ -177,7 +197,7 @@ void opcontrol() {
 		//intake R1
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 			intake.move(127);
-			chain.move(127);
+			chain.move(110);
 		} else {
 			intake.move(0);
 			chain.move(0);
