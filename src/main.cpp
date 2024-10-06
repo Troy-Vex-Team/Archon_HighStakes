@@ -35,10 +35,10 @@ lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
                               8);
 
 // lateral PID controller
-lemlib::ControllerSettings linearController(10.02, // proportional gain (kP)
-                                            0.75, // integral gain (kI)
-                                            35.45, // derivative gain (kD)
-                                            1, // anti windup
+lemlib::ControllerSettings linearController(6, // proportional gain (kP)
+                                            0, // integral gain (kI)
+                                            14.5, // derivative gain (kD) 
+                                            0.6, // anti windup
                                             1, // small error range, in inches
                                             100, // small error range timeout, in milliseconds
                                             3, // large error range, in inches
@@ -88,16 +88,14 @@ void initialize() {
 	intake.set_brake_mode(pros::MotorBrake::coast);
 	chain.set_brake_mode(pros::MotorBrake::brake);
 //  lift.set_brake_mode(pros::MotorBrake::brake);
-
-    chassis.moveToPoint(0, 24, 4000);
-    
+    /*
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
         pros::lcd::print(2, "%f x", chassis.getPose().x);
         pros::lcd::print(3, "%f y", chassis.getPose().y);
 
         pros::delay(500);
-    } 
+    } */
 
     
 }
@@ -119,17 +117,23 @@ void autonomous() {
     mogomech.extend();
 
     //start code here 
-    chassis.moveToPoint(0, 12, 4000);
-    chassis.turnToHeading(270, 1000);
-    chassis.moveToPoint(15, 14.5, 4000, {.forwards = false}, false);
-    // was 7.25 before
+    // 1st quadrant 
+    chassis.moveToPoint(0, 14, 4000);
+    chassis.turnToHeading(-90, 1000);
+    chassis.moveToPoint(31, 18, 4000, {.forwards = false}, false);
     //pick up mogo one
-    chassis.moveToPoint(7.75, 14.5, 4000, {.forwards = false}, false);
     chassis.turnToHeading(0, 1000);
-    chassis.moveToPoint(4.5, 10.5, 4000);
-    chassis.moveToPoint(5.5, 32.75, 4000);
-    chassis.turnToHeading(58.75, 1000);
-    chassis.moveToPoint(37.25, 59, 4000);
+    chassis.moveToPoint(29, 41, 4000);
+    chassis.turnToHeading(56.5, 1000);
+    chassis.moveToPoint(55.75, 66.5, 4000);
+    chassis.moveToPose(54, 84.5, 180, 4000,{.forwards = false});
+    chassis.moveToPoint(58.25, 12.75, 4000);
+    chassis.moveToPose(34, 20.5, 90, 4000,{.forwards = false});    
+    chassis.moveToPoint(54.75, 20.25, 4000);
+    chassis.turnToHeading(-27, 1000);
+    chassis.moveToPoint(69.0, 4, 4000, {.forwards = false});
+    //drop mogo 1
+
     chassis.moveToPoint(29, 52.5, 4000, {.forwards = false}, false);
     chassis.turnToHeading(184, 1000);
     chassis.moveToPoint(28, 6, 4000);
