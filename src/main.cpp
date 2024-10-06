@@ -13,7 +13,7 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup leftMotors({-2, 1, -3}, pros::MotorGearset::blue); 
 pros::MotorGroup rightMotors({11, 12, -13}, pros::MotorGearset::blue); 
 
-pros::Motor intake(14, pros::MotorGears::green, pros::v5::MotorUnits::rotations);
+pros::Motor intake(14, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);
 pros::Motor chain(-19, pros::MotorGears::blue, pros::MotorUnits::rotations);
 //pros::Motor lift(-21, pros::MotorGears::green, pros::v5::MotorEncoderUnits::rotations);
 pros::adi::Pneumatics mogomech(1, true);
@@ -81,12 +81,20 @@ lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
 
+void checkIntakeChain(){
+    if (chain.get_voltage() > 0 && chain.get_actual_velocity() < 25) {
+        chain.move_relative(-1, 600);
+    }
+    chain.move(127);
+}
+
 void initialize() {
 	pros::lcd::initialize();
 	chassis.calibrate(); // calibrate sensors
     
 	intake.set_brake_mode(pros::MotorBrake::coast);
 	chain.set_brake_mode(pros::MotorBrake::brake);
+    
 //  lift.set_brake_mode(pros::MotorBrake::brake);
     /*
     while(1) {
@@ -112,78 +120,36 @@ void autonomous() {
     chassis.setPose(0, 0, 0);
 
     intake.move(127);
-    chain.move(127);
+    chain.move(110);
     pros::delay(600);
-    mogomech.extend();
 
     //start code here 
     // 1st quadrant 
-    chassis.moveToPoint(0, 14, 4000);
-    chassis.turnToHeading(-90, 1000);
-    chassis.moveToPoint(31, 18, 4000, {.forwards = false}, false);
+    chassis.moveToPoint(0, 14, 4000,{.maxSpeed = 80});
+    chassis.turnToHeading(-90, 1000,{.maxSpeed = 90});
+    mogomech.retract();
+    chassis.moveToPoint(31, 18, 4000,{.forwards = false, .maxSpeed = 50}, false);
     //pick up mogo one
-    chassis.turnToHeading(0, 1000);
-    chassis.moveToPoint(29, 41, 4000);
-    chassis.turnToHeading(56.5, 1000);
-    chassis.moveToPoint(55.75, 66.5, 4000);
-    chassis.moveToPose(54, 84.5, 180, 4000,{.forwards = false});
-    chassis.moveToPoint(58.25, 12.75, 4000);
-    chassis.moveToPose(34, 20.5, 90, 4000,{.forwards = false});    
-    chassis.moveToPoint(54.75, 20.25, 4000);
-    chassis.turnToHeading(-27, 1000);
-    chassis.moveToPoint(69.0, 4, 4000, {.forwards = false});
+    mogomech.extend();
+    pros::delay(300);
+    chassis.turnToHeading(0, 1000, {.maxSpeed = 90});
+    chassis.moveToPoint(23.5, 42, 4000, {.maxSpeed = 55}, false);
+    pros::delay(500);
+    chassis.turnToHeading(56.5, 1000, {.maxSpeed = 90});
+    chassis.moveToPoint(52, 64, 4000, {.maxSpeed = 55});
+    chassis.moveToPoint(37, 60, 4000, {.forwards = false, .maxSpeed = 55});
+    chassis.turnToHeading(180, 1000, {.maxSpeed = 50});
+    chassis.moveToPoint(45, 12.75, 4000, {.maxSpeed = 40});
+    checkIntakeChain();
+    chassis.moveToPose(30, 25, 90, 4000,{.forwards = false, .maxSpeed = 70});    
+    chassis.moveToPoint(48, 16, 4000,{.maxSpeed = 50});
+    checkIntakeChain();
+    chassis.turnToHeading(-22, 1000,{.maxSpeed = 90});
+    chassis.moveToPoint(63, 1, 4000, {.forwards = false, .maxSpeed = 70}, false);
     //drop mogo 1
+    mogomech.retract();
 
-    chassis.moveToPoint(29, 52.5, 4000, {.forwards = false}, false);
-    chassis.turnToHeading(184, 1000);
-    chassis.moveToPoint(28, 6, 4000);
-    chassis.moveToPoint(28.25, 8.25, 4000, {.forwards = false}, false);
-    chassis.turnToHeading(146.5, 1000);
-    chassis.moveToPoint(31.75, -5, 4000);
-    chassis.turnToHeading(339.25, 1000);
-    chassis.moveToPoint(33.5, -13.25, 4000);
-    //score mogoone
-    chassis.moveToPose( -26, -7, -263.75, 4000);
-    //pickup mogo
-    chassis.moveToPoint(-33, -7, 4000, {.forwards = false}, false);
-    chassis.turnToHeading(-371.75, 1000);
-    chassis.moveToPose( -30, 10, -368.75, 4000);
-    chassis.moveToPose( -56.75, 40.75, -406.75, 4000);
-    chassis.turnToHeading(-553, 1000);
-    chassis.moveToPoint(-54.25, 28.25, 4000);
-    chassis.moveToPose( -58.25, -6.5, -528, 4000);
-    chassis.moveToPose( -64.75, -3, -393.5, 4000);
-    chassis.moveToPose( -76.5, -10.5, -315.5, 4000);
-    //stop intake
-    chassis.moveToPose( -50, 43, -346, 4000);
-    chassis.turnToHeading(-313, 1000);
-    chassis.moveToPoint(-31.25, 64.75, 4000);
-    chassis.moveToPose(-23.4, 73.75, -494.5, 4000);
-    chassis.moveToPoint(-23.25, 73.75, 4000, {.forwards = false}, false);
-    chassis.moveToPose(-68.5, 69.5, -432.25, 4000);
-    chassis.moveToPose(-32.0, 73.5, -250.5, 4000);
-    chassis.turnToHeading(-212.75, 1000);
-    chassis.moveToPoint(-8, 44, 4000);
-    chassis.turnToHeading(-250, 1000);
-    chassis.moveToPoint(12.75, 30, 4000);
-    chassis.turnToHeading(-429.5, 1000);
-    //drop mogo #3
-    chassis.moveToPose(-16, 74.5, -338.25, 4000);
-    chassis.turnToHeading(-427, 1000);
-    chassis.moveToPoint(-2, 75, 4000);
-    //pickup mogo #4
-    chassis.turnToHeading(-438, 1000);
-    //drop mogo
-    chassis.moveToPoint(1.75, 76.5, 4000);
-    chassis.moveToPose(-42.75, 93.5, -422.5, 4000);
-    chassis.moveToPose(-49.75, 95.75, -242.5, 4000);
-    chassis.moveToPoint(-51.75, 97, 4000);
-    //pickup mogo #5
-    chassis.moveToPose(-55.25, 100.25, -230, 4000);
-    //drop mogo #5
-    chassis.moveToPose(-36.25, 77, -152.25, 4000);
-
-
+    //3rd quadrant
 
     //end code here 
     pros::lcd::print(1, "Autonomous Routine Finished");
@@ -210,8 +176,8 @@ void opcontrol() {
 
 		//intake R1
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-			intake.move(100);
-			chain.move(100);
+			intake.move(127);
+			chain.move(127);
 		} else {
 			intake.move(0);
 			chain.move(0);
