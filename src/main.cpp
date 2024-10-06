@@ -119,11 +119,11 @@ void autonomous() {
     pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
     chassis.setPose(0, 0, 0);
 
+    //start code here 
+    //score pre load
     intake.move(127);
     chain.move(110);
     pros::delay(600);
-
-    //start code here 
     // 1st quadrant 
     chassis.moveToPoint(0, 14, 4000,{.maxSpeed = 80});
     chassis.turnToHeading(-90, 1000,{.maxSpeed = 90});
@@ -135,13 +135,13 @@ void autonomous() {
     chassis.turnToHeading(0, 1000, {.maxSpeed = 90});
     chassis.moveToPoint(23.5, 42, 4000, {.maxSpeed = 55}, false);
     pros::delay(500);
-    chassis.turnToHeading(56.5, 1000, {.maxSpeed = 90});
+    chassis.turnToHeading(56.5, 1000, {.maxSpeed = 70});
     chassis.moveToPoint(52, 64, 4000, {.maxSpeed = 55});
-    chassis.moveToPoint(37, 60, 4000, {.forwards = false, .maxSpeed = 55});
+    chassis.moveToPoint(38.5, 60, 4000, {.forwards = false, .maxSpeed = 55});
     chassis.turnToHeading(180, 1000, {.maxSpeed = 50});
-    chassis.moveToPoint(45, 12.75, 4000, {.maxSpeed = 40});
+    chassis.moveToPoint(46, 12.75, 4000, {.maxSpeed = 40});
     checkIntakeChain();
-    chassis.moveToPose(30, 25, 90, 4000,{.forwards = false, .maxSpeed = 70});    
+    chassis.moveToPose(30, 25, 90, 2500,{.forwards = false, .maxSpeed = 70});    
     chassis.moveToPoint(46, 16, 4000,{.maxSpeed = 50});
     checkIntakeChain();
     chassis.turnToHeading(-22, 1000,{.maxSpeed = 70});
@@ -149,28 +149,29 @@ void autonomous() {
     //drop mogo 1
     mogomech.retract();
 
-    //3rd quadrant
-    chassis.moveToPose(20, 11, 90, 5000);
-    chassis.moveToPoint(-29, 15, 4000, {.forwards = false, .maxSpeed = 55}, false);
+    //4th quadrant
+    chassis.moveToPose(20, 13, 90, 3000);
+    chassis.moveToPoint(-29, 16.5, 4000, {.forwards = false, .maxSpeed = 55}, false);
     //pick up mogo 2
     mogomech.extend();
     pros::delay(300);
     chassis.turnToHeading(0, 1000, {.maxSpeed = 90});
     chassis.moveToPoint(-23.5, 42, 4000, {.maxSpeed = 55}, false);
     pros::delay(500);
-    chassis.turnToHeading(-56.5, 1000, {.maxSpeed = 90});
+    chassis.turnToHeading(-56.5, 1000, {.maxSpeed = 70});
     chassis.moveToPoint(-52, 64, 4000, {.maxSpeed = 55});
-    chassis.moveToPoint(-37, 60, 4000, {.forwards = false, .maxSpeed = 55});
+    chassis.moveToPoint(-40, 60, 4000, {.forwards = false, .maxSpeed = 55});
     chassis.turnToHeading(-180, 1000, {.maxSpeed = 50});
     chassis.moveToPoint(-45, 12.75, 4000, {.maxSpeed = 40});
     checkIntakeChain();
-    chassis.moveToPose(-30, 25, -90, 4000,{.forwards = false, .maxSpeed = 70});    
-    chassis.moveToPoint(-48, 16, 4000,{.maxSpeed = 50});
+    chassis.moveToPose(-30, 22, -90, 2500,{.forwards = false, .maxSpeed = 70});    
+    chassis.moveToPoint(-48, 12, 4000,{.maxSpeed = 50});
     checkIntakeChain();
     chassis.turnToHeading(22, 1000,{.maxSpeed = 70});
-    chassis.moveToPoint(-63, 1, 4000, {.forwards = false, .maxSpeed = 70}, false);
+    chassis.moveToPoint(-63, 0, 4000, {.forwards = false, .maxSpeed = 70}, false);
     //drop mogo 2
-
+    mogomech.retract();
+    chassis.moveToPoint(-54, 20, 4000);
     //end code here 
     pros::lcd::print(1, "Autonomous Routine Finished");
     
