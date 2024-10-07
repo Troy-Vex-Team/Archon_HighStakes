@@ -151,7 +151,7 @@ void autonomous() {
 
     //4th quadrant
     chassis.moveToPose(20, 13, 90, 3000);
-    chassis.moveToPoint(-29, 16.5, 4000, {.forwards = false, .maxSpeed = 55}, false);
+    chassis.moveToPoint(-27, 16.5, 4000, {.forwards = false, .maxSpeed = 55}, false);
     //pick up mogo 2
     mogomech.extend();
     pros::delay(300);
@@ -168,10 +168,9 @@ void autonomous() {
     chassis.moveToPoint(-48, 12, 4000,{.maxSpeed = 50});
     checkIntakeChain();
     chassis.turnToHeading(22, 1000,{.maxSpeed = 70});
-    chassis.moveToPoint(-63, 0, 4000, {.forwards = false, .maxSpeed = 70}, false);
+    chassis.moveToPoint(-63, -4, 4000, {.forwards = false, .maxSpeed = 70}, false);
     //drop mogo 2
     mogomech.retract();
-    chassis.moveToPoint(-54, 20, 4000);
     //end code here 
     pros::lcd::print(1, "Autonomous Routine Finished");
     
