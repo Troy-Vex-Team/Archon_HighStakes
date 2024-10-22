@@ -27,7 +27,7 @@ pros::Motor stakemech(-21, pros::MotorGears::green, pros::v5::MotorEncoderUnits:
 //PNEUMATICS
 pros::adi::Pneumatics mogomech(1, true); //mobile goal mech (peumatics)
 
-//drivetrain settings
+//DRIVETRAIN SETTINGS
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 
                               11.22, 
                               lemlib::Omniwheel::NEW_325, 
@@ -35,7 +35,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
                               8
 );
 
-// lateral PID controller
+//LATERAL PID CONTROLLER
 lemlib::ControllerSettings linearController(6, // proportional gain (kP)
                                             0, // integral gain (kI)
                                             14.5, // derivative gain (kD) 
@@ -47,7 +47,7 @@ lemlib::ControllerSettings linearController(6, // proportional gain (kP)
                                             20 // maximum acceleration (slew)
 );
 
-// angular PID controller
+//ANGULAR PID CONTROLLER
 lemlib::ControllerSettings angularController(6.01, // proportional gain (kP)
                                               1.015, // integral gain (kI)
                                               48.75, // derivative gain (kD)
@@ -71,7 +71,7 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
                                   1.019 // expo curve gain
 );
 
-// sensors for odometry
+//ODOMETRY
 lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal, // horizontal tracking wheel
@@ -189,10 +189,6 @@ void opcontrol() {
         // move the robot
         chassis.arcade(leftY, rightX);
 
-        // delay to save resources
-        pros::delay(25);
-
-
 		//intake R1
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 			intake.move(127);
@@ -221,7 +217,7 @@ void opcontrol() {
         }
         last_L1_state = current_L1_state; 
 
-		pros::delay(20);                 
+		pros::delay(25);                 
 	}
 	
 }
