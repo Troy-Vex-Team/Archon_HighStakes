@@ -9,30 +9,31 @@
 #include "pros/rtos.hpp"
 #include <string>
 
+//CONTROLLER & SENSORS
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
-pros::MotorGroup leftMotors({-2, 1, -3}, pros::MotorGearset::blue); 
-pros::MotorGroup rightMotors({11, 12, -13}, pros::MotorGearset::blue); 
+pros::Imu imu(4); //inertial sensor
+pros::Rotation verticalEnc(-17); //vertical rotational sensor
+pros::Rotation horizontalEnc(15); //horitontal rotational sensor
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 2); //vertical tracking wheel
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, .625); //horizontal tracking wheel
 
-pros::Motor intake(14, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);
-pros::Motor chain(-19, pros::MotorGears::blue, pros::MotorUnits::rotations);
-//pros::Motor lift(-21, pros::MotorGears::green, pros::v5::MotorEncoderUnits::rotations);
-pros::adi::Pneumatics mogomech(1, true);
-pros::adi::Pneumatics release(2, false);
+//MOTORS
+pros::MotorGroup leftMotors({-2, 1, -3}, pros::MotorGearset::blue); //front, top, bottom (left)
+pros::MotorGroup rightMotors({11, 12, -13}, pros::MotorGearset::blue); //front, top, bottom (right)
+pros::Motor intake(14, pros::MotorGears::blue, pros::v5::MotorUnits::rotations); //front intake
+pros::Motor chain(-19, pros::MotorGears::blue, pros::MotorUnits::rotations); //chain intake
+pros::Motor stakemech(-21, pros::MotorGears::green, pros::v5::MotorEncoderUnits::rotations); //lady brown
 
-pros::Imu imu(4);
-pros::Rotation verticalEnc(-17);
-pros::Rotation horizontalEnc(15);
-
-// tracking wheels
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 2);
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, .625);
+//PNEUMATICS
+pros::adi::Pneumatics mogomech(1, true); //mobile goal mech (peumatics)
 
 //drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 
                               11.22, 
                               lemlib::Omniwheel::NEW_325, 
                               360, 
-                              8);
+                              8
+);
 
 // lateral PID controller
 lemlib::ControllerSettings linearController(6, // proportional gain (kP)
@@ -78,8 +79,8 @@ lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
                             &imu // inertial sensor
 );
 
+//DRIVETRAIN
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
-
 
 void checkIntakeChain(){
     if (chain.get_voltage() > 0 && chain.get_actual_velocity() < 25) {
@@ -92,19 +93,17 @@ void initialize() {
 	pros::lcd::initialize();
 	chassis.calibrate(); // calibrate sensors
     
-	intake.set_brake_mode(pros::MotorBrake::coast);
-	chain.set_brake_mode(pros::MotorBrake::brake);
-    
-//  lift.set_brake_mode(pros::MotorBrake::brake);
     /*
+    chassis.setPose(0,0,0); // coordinates + heading to 0
+    chassis.turnToHeading(90, 5000); //turn 90 degrees
+    chassis.moveToPoint(0, 24, 5000); //forward 24 inches
+    
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
-        pros::lcd::print(2, "%f x", chassis.getPose().x);
-        pros::lcd::print(3, "%f y", chassis.getPose().y);
-
+        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
+        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
         pros::delay(500);
-    } 
-    */
+    }*/
     
 }
 
@@ -222,10 +221,6 @@ void opcontrol() {
         }
         last_L1_state = current_L1_state; 
 
-        //release pneumatics x buttom
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
-            release.extend();
-        }
 		pros::delay(20);                 
 	}
 	
