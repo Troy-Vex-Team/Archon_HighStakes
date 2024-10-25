@@ -25,7 +25,8 @@ pros::Motor chain(-13, pros::MotorGears::blue, pros::MotorUnits::rotations);    
 pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::rotations); // lady brown
 
 // PNEUMATICS
-pros::adi::Pneumatics mogomech(1, true); // mobile goal mech (peumatics)
+pros::adi::Pneumatics mogomech(1, true); //mobile goal mech
+pros::adi::Pneumatics doinker(2, false); //doinker mech 
 
 // DRIVETRAIN SETTINGS
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
@@ -183,7 +184,6 @@ void opcontrol()
     bool last_L1_state = false;
     while (true)
     {
-
         // get left y and right y positions
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
@@ -207,37 +207,27 @@ void opcontrol()
             intake.move(80);
             chain.move(-75);
         }
-        // newlift
+        //lady brown
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
         {
             stakemech.move(100);
-        }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
+        }else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
         {
             stakemech.move(-100);
-        }
-        else
+        }else
         {
             stakemech.move(0);
         }
-
-        /*lift
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-            lift.move(100);
-
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-            lift.move(-100);
-        } else {
-            lift.move(0);
-        }
-        bool L2State = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);*/
-        // mogomech pneumatics L1
+        //mogomech
         bool current_L1_state = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
         if (current_L1_state && !last_L1_state)
         {
             mogomech.toggle();
         }
         last_L1_state = current_L1_state;
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+            doinker.toggle();
+        }
 
         pros::delay(25);
     }
