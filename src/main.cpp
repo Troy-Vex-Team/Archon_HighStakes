@@ -11,11 +11,11 @@
 
 // CONTROLLER & SENSORS
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
-pros::Imu imu(4);                                                              // inertial sensor
-pros::Rotation verticalEnc(-20);                                               // vertical rotational sensor
+pros::Imu imu(21);                                                            // inertial sensor
+pros::Rotation verticalEnc(20);                                               // vertical rotational sensor
 pros::Rotation horizontalEnc(18);                                              // horitontal rotational sensor
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 2); // vertical tracking wheel
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, .625);  // horizontal tracking wheel
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 1.5); // vertical tracking wheel
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);  // horizontal tracking wheel
 
 // MOTORS
 pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                         // front, top, bottom (left)
@@ -36,10 +36,10 @@ lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
                               8);
 
 // LATERAL PID CONTROLLER
-lemlib::ControllerSettings linearController(6,    // proportional gain (kP)
-                                            0,    // integral gain (kI)
-                                            14.5, // derivative gain (kD)
-                                            0.6,  // anti windup
+lemlib::ControllerSettings linearController(7.2,    // proportional gain (kP)
+                                            0.07,    // integral gain (kI)
+                                            33.7, // derivative gain (kD)
+                                            0.027,  // anti windup
                                             1,    // small error range, in inches
                                             100,  // small error range timeout, in milliseconds
                                             3,    // large error range, in inches
@@ -48,10 +48,10 @@ lemlib::ControllerSettings linearController(6,    // proportional gain (kP)
 );
 
 // ANGULAR PID CONTROLLER
-lemlib::ControllerSettings angularController(6.01,  // proportional gain (kP)
-                                             1.015, // integral gain (kI)
-                                             48.75, // derivative gain (kD)
-                                             1.5,   // anti windup
+lemlib::ControllerSettings angularController(5.25,  // proportional gain (kP)
+                                             1, // integral gain (kI)
+                                             44.8, // derivative gain (kD)
+                                             1.1505,   // anti windup
                                              0,     // small error range, in degrees
                                              0,     // small error range timeout, in milliseconds
                                              0,     // large error range, in degrees
@@ -96,17 +96,16 @@ void initialize()
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
-    /*
     chassis.setPose(0,0,0); // coordinates + heading to 0
-    chassis.turnToHeading(90, 5000); //turn 90 degrees
-    chassis.moveToPoint(0, 24, 5000); //forward 24 inches
+    chassis.moveToPoint(0, 24, 4000);
+    //chassis.moveToPoint(0, 24, 5000); //forward 24 inches
 
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
         pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
         pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
         pros::delay(500);
-    }*/
+    }
 }
 
 void disabled() {} // disregard don't delete
@@ -119,9 +118,9 @@ void competition_initialize()
 void autonomous()
 {
     // set chassis pose
-    pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
     chassis.setPose(0, 0, 0);
 
+    /*
     // start code here
     // score pre load
     intake.move(127);
@@ -176,6 +175,7 @@ void autonomous()
     mogomech.retract();
     // end code here
     pros::lcd::print(1, "Autonomous Routine Finished");
+    */
 }
 
 void opcontrol()
@@ -227,6 +227,7 @@ void opcontrol()
         last_L1_state = current_L1_state;
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
             doinker.toggle();
+            pros::delay(200);
         }
 
         pros::delay(25);
