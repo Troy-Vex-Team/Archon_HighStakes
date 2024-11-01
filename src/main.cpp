@@ -6,6 +6,8 @@
 #include "pros/adi.hpp"
 #include "pros/llemu.hpp"
 #include "pros/misc.h"
+#include "pros/motors.h"
+#include "pros/motors.hpp"
 #include "pros/rtos.hpp"
 #include <string>
 
@@ -22,7 +24,7 @@ pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);            
 pros::MotorGroup rightMotors({19, 9, -8}, pros::MotorGearset::blue);                         // front, top, bottom (right)
 pros::Motor intake(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);              // front intake
 pros::Motor chain(-13, pros::MotorGears::blue, pros::MotorUnits::rotations);                 // chain intake
-pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::rotations); // lady brown
+pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
 
 // PNEUMATICS
 pros::adi::Pneumatics mogomech(1, true); //mobile goal mech
@@ -33,25 +35,26 @@ lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
                               11.22,
                               lemlib::Omniwheel::NEW_325,
                               360,
-                              8);
+                              8
+);
 
 // LATERAL PID CONTROLLER
 lemlib::ControllerSettings linearController(7.2,    // proportional gain (kP)
-                                            0.07,    // integral gain (kI)
+                                            .95,    // integral gain (kI)
                                             33.7, // derivative gain (kD)
-                                            0.027,  // anti windup
-                                            1,    // small error range, in inches
-                                            100,  // small error range timeout, in milliseconds
-                                            3,    // large error range, in inches
-                                            500,  // large error range timeout, in milliseconds
-                                            20    // maximum acceleration (slew)
+                                            0.07,  // anti windup
+                                            0,    // small error range, in inches
+                                            0,  // small error range timeout, in milliseconds
+                                            0,    // large error range, in inches
+                                            0,  // large error range timeout, in milliseconds
+                                            0    // maximum acceleration (slew)
 );
 
 // ANGULAR PID CONTROLLER
 lemlib::ControllerSettings angularController(5.25,  // proportional gain (kP)
                                              1, // integral gain (kI)
                                              44.8, // derivative gain (kD)
-                                             1.1505,   // anti windup
+                                             2,   // anti windup
                                              0,     // small error range, in degrees
                                              0,     // small error range timeout, in milliseconds
                                              0,     // large error range, in degrees
@@ -82,8 +85,7 @@ lemlib::OdomSensors sensors(&vertical,   // vertical tracking wheel
 // DRIVETRAIN
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-void checkIntakeChain()
-{
+void checkIntakeChain() {
     if (chain.get_voltage() > 0 && chain.get_actual_velocity() < 25)
     {
         chain.move_relative(-1, 600);
@@ -91,14 +93,22 @@ void checkIntakeChain()
     chain.move(110);
 }
 
-void initialize()
-{
+void initialize() {
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
+    intake.set_brake_mode(pros::MotorBrake::coast);
+    chain.set_brake_mode(pros::MotorBrake::coast);
+    stakemech.set_brake_mode(pros::MotorBrake::hold);
+    leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
+    rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
+    stakemech.set_zero_position(0);
+
+    /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
-    chassis.moveToPoint(0, 24, 4000);
-    //chassis.moveToPoint(0, 24, 5000); //forward 24 inches
+    chassis.turnToHeading(120,3000);
+    chassis.turnToHeading(0,3000);
+    chassis.moveToPoint(0, 24, 5000); //forward 24 inches
 
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
@@ -106,6 +116,7 @@ void initialize()
         pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
         pros::delay(500);
     }
+    */
 }
 
 void disabled() {} // disregard don't delete
@@ -180,42 +191,50 @@ void autonomous()
 
 void opcontrol()
 {
-    bool mogo = true;
+    /*
+    L1 - mogo
+    L2 - set lady brown
+    left - doinker
+    R1 - intake up
+    R2 - chain down
+    Right Arrow - score lady brown
+    Y - down lady brown
+    */
+
     bool last_L1_state = false;
     while (true)
     {
-        // get left y and right y positions
+        //drivetrain
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-
-        // move the robot
         chassis.arcade(leftY, rightX);
-        // intake R1
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
-        {
+
+        //intake 
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
             intake.move(-127);
-            chain.move(110);
-        }
-        else
-        {
+            chain.move(127);
+        } else {
             intake.move(0);
             chain.move(0);
         }
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-        {
-            // random # bcz said wanted intake to move too
-            intake.move(80);
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+            intake.move(100);
             chain.move(-75);
         }
         //lady brown
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
-        {
-            stakemech.move(100);
-        }else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
-        {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+            stakemech.move_absolute(440, 90);
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) { //move up
+            if (stakemech.get_position() > 1750) {
+                stakemech.move(-25);
+            } else{
+                stakemech.move(100);
+            }
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { //move down
             stakemech.move(-100);
-        }else
-        {
+        } else if (stakemech.get_position() > 1750) {
+                stakemech.move(-25);
+        } else {
             stakemech.move(0);
         }
         //mogomech
@@ -225,9 +244,11 @@ void opcontrol()
             mogomech.toggle();
         }
         last_L1_state = current_L1_state;
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+
+        //doinker
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
             doinker.toggle();
-            pros::delay(200);
+            pros::delay(300);
         }
 
         pros::delay(25);
