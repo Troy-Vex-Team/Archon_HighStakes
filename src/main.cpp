@@ -8,7 +8,9 @@
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/motors.hpp"
+#include "pros/optical.h"
 #include "pros/rtos.hpp"
+#include "pros/vision.hpp"
 #include <string>
 
 // CONTROLLER & SENSORS
@@ -18,6 +20,10 @@ pros::Rotation verticalEnc(20);                                               //
 pros::Rotation horizontalEnc(18);                                              // horitontal rotational sensor
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 1.5); // vertical tracking wheel
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);  // horizontal tracking wheel
+pros::Vision visionSensor(10); // vision sensor
+pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(1, 0, 0, 0, 0, 0, 0, 0, 0);
+pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(2, 0, 0, 0, 0, 0, 0, 0, 0);
+
 
 // MOTORS
 pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                         // front, top, bottom (left)
@@ -62,13 +68,13 @@ lemlib::ControllerSettings angularController(5.25,  // proportional gain (kP)
                                              0      // maximum acceleration (slew)
 );
 
-// input curve for throttle input during driver control
+// TROTTLE INPUT CURVE
 lemlib::ExpoDriveCurve throttleCurve(3,    // joystick deadband out of 127
                                      10,   // minimum output where drivetrain will move out of 127
                                      1.019 // expo curve gain
 );
 
-// input curve for steer input during driver control
+// STEER INPUT CURVE
 lemlib::ExpoDriveCurve steerCurve(3,    // joystick deadband out of 127
                                   10,   // minimum output where drivetrain will move out of 127
                                   1.019 // expo curve gain
@@ -85,18 +91,11 @@ lemlib::OdomSensors sensors(&vertical,   // vertical tracking wheel
 // DRIVETRAIN
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-void checkIntakeChain() {
-    if (chain.get_voltage() > 0 && chain.get_actual_velocity() < 25)
-    {
-        chain.move_relative(-1, 600);
-    }
-    chain.move(110);
-}
-
 void initialize() {
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
+    //Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::coast);
     chain.set_brake_mode(pros::MotorBrake::coast);
     stakemech.set_brake_mode(pros::MotorBrake::hold);
@@ -110,7 +109,6 @@ void initialize() {
     chassis.turnToHeading(0,3000);
     chassis.moveToPoint(0, 24, 5000); //forward 24 inches
     */
-   pros::delay(500);
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
         pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
@@ -122,25 +120,154 @@ void initialize() {
 
 void disabled() {} // disregard don't delete
 
-void competition_initialize()
-{
-    // initialize sensors + autonomous selector here
+int autonToRun = 1;
+bool winPoint = false;
+
+const char* getAutonName(int autonNumber) {
+    switch (autonNumber) {
+        case 1: return "Red Left";
+        case 2: return "Red Right";
+        case 3: return "Blue Left";
+        case 4: return "Blue Right";
+        case 5: return "Skills";
+        default: return "None";
+    }
 }
 
-void autonomous()
-{
-    // set chassis pose
-    chassis.setPose(-147.73, 126.329, 330);
-    chassis.moveToPoint(0, -27.5, 1000)
+void displaySelectedAuton() {
+    pros::lcd::clear();
+    pros::lcd::print(0, "Autonomous: %s", getAutonName(autonToRun));
+    pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
+}
 
+/*
+void detectColors() {
+    // Take snapshots for red and blue signatures
+    visionSensor.get_by_sig(RED_SIG);
+    
+    // Check if any red object is detected
+    if (visionSensor.get_object_count() > 0) {
+        pros::vision_object_s_t red_obj = visionSensor.get_by_sig(0, RED_SIG.id);
+        
+        pros::lcd::print(0, "Red Object Detected:");
+        pros::lcd::print(1, "X: %d Y: %d Width: %d Height: %d",
+                         red_obj.x_middle_coord, red_obj.y_middle_coord, red_obj.width, red_obj.height);
+        
+        // Example action if red object is of significant size
+        if (red_obj.width > 50) {
+            pros::lcd::print(2, "Large Red Object Detected!");
+            // Add code to respond to a large red object, e.g., move robot
+        }
+    } else {
+        pros::lcd::print(0, "No Red Object Detected");
+    }
+    
+    // Now, take snapshot for blue signature
+    visionSensor.get_by_sig(0, BLUE_SIG);
+    
+    // Check if any blue object is detected
+    if (visionSensor.get_object_count() > 0) {
+        pros::vision_object_s_t blue_obj = visionSensor.get_by_sig(0, BLUE_SIG.id);
+        
+        pros::lcd::print(3, "Blue Object Detected:");
+        pros::lcd::print(4, "X: %d Y: %d Width: %d Height: %d",
+                         blue_obj.x_middle_coord, blue_obj.y_middle_coord, blue_obj.width, blue_obj.height);
+        
+        // Example action if blue object is of significant size
+        if (blue_obj.width > 50) {
+            pros::lcd::print(5, "Large Blue Object Detected!");
+            // Add code to respond to a large blue object, e.g., move robot
+        }
+    } else {
+        pros::lcd::print(3, "No Blue Object Detected");
+    }
+}
+*/
 
-    while(1) {
-        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
-        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
-        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
-        pros::delay(500);
+void competition_initialize(){
+    pros::lcd::initialize();
+    chassis.calibrate(); // calibrate sensors
+
+    //Intialize brake mode & postitions
+    intake.set_brake_mode(pros::MotorBrake::coast);
+    chain.set_brake_mode(pros::MotorBrake::coast);
+    stakemech.set_brake_mode(pros::MotorBrake::hold);
+    leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
+    rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
+    stakemech.set_zero_position(0);
+    displaySelectedAuton();
+
+    while(true) {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+            autonToRun++;
+            if (autonToRun > 5) autonToRun = 1;
+            displaySelectedAuton();
+            pros::delay(200);
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+            autonToRun--;      
+            if (autonToRun < 1) autonToRun = 5; // Loop back to 7 if below range
+            displaySelectedAuton();
+            pros::delay(200);
+        } 
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+            winPoint = !winPoint; 
+            displaySelectedAuton();   
+            pros::delay(200);
+        }
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+            break;  // confirm selection
+        }
+        pros::delay(20);
+    }
+    pros::lcd::clear();
+    pros::lcd::print(0, "Final Auton: %s", getAutonName(autonToRun));
+    pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
+
+}
+
+void autonomous() {
+    /*
+    1 = Red Left 
+    2 = Red Right
+    3 = Blue Left
+    4 = Blue Right
+    5 = Skills
+    */
+    if(autonToRun == 1) { 
+        if (winPoint) {
+            //red left wp
+        } else {
+            //red left normal
+        }
+    }
+    if(autonToRun == 2) {
+        if (winPoint) {
+            //red right wp
+        } else {
+            //red right normal
+        }
+    }
+    if(autonToRun == 3) {
+        if (winPoint) {
+            //blue left wp
+        } else {
+            //blue left normal
+        }
+    }
+    if(autonToRun == 4) {
+        if (winPoint) {
+            //blue right wp
+        } else {
+            //blue right normal
+        }
+    }
+    if(autonToRun == 5) {
+        //skills
     }
 
+    // set chassis pose
+    chassis.setPose(-147.73, 126.329, 330);
+    chassis.moveToPoint(0, -27.5, 1000);
 
     /*
     // start code here
@@ -200,8 +327,8 @@ void autonomous()
     */
 }
 
-void opcontrol()
-{
+//DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/1/24
+void opcontrol() {
     /*
     L1 - mogo
     L2 - set lady brown
@@ -211,13 +338,6 @@ void opcontrol()
     Right Arrow - score lady brown
     Y - down lady brown
     */
-   pros::delay(500);
-    while(1) {
-        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
-        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
-        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
-        pros::delay(500);
-    }
     
     bool last_L1_state = false;
     while (true)
