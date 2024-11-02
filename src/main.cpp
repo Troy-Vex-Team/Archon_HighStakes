@@ -21,9 +21,8 @@ pros::Rotation horizontalEnc(18);                                              /
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 1.5); // vertical tracking wheel
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);  // horizontal tracking wheel
 pros::Vision visionSensor(10); // vision sensor
-pros::vision_signature_s_t RED_SIG = pros::Vision::signature_from_utility(1, 0, 0, 0, 0, 0, 0, 0, 0);
-pros::vision_signature_s_t BLUE_SIG = pros::Vision::signature_from_utility(2, 0, 0, 0, 0, 0, 0, 0, 0);
-
+pros::vision_signature_s_t redSig = pros::Vision::signature_from_utility(1, 0, 0, 0, 0, 0, 0, 0, 0);
+pros::vision_signature_s_t blueSig = pros::Vision::signature_from_utility(2, 0, 0, 0, 0, 0, 0, 0, 0);
 
 // MOTORS
 pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                         // front, top, bottom (left)
@@ -125,10 +124,10 @@ bool winPoint = false;
 
 const char* getAutonName(int autonNumber) {
     switch (autonNumber) {
-        case 1: return "Red Left";
-        case 2: return "Red Right";
-        case 3: return "Blue Left";
-        case 4: return "Blue Right";
+        case 1: return "Red Ring Side";
+        case 2: return "Red Goal Side";
+        case 3: return "Blue Goal Side";
+        case 4: return "Blue Ring Side";
         case 5: return "Skills";
         default: return "None";
     }
@@ -139,11 +138,12 @@ void displaySelectedAuton() {
     pros::lcd::print(0, "Autonomous: %s", getAutonName(autonToRun));
     pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
 }
-
 /*
 void detectColors() {
+
+    visionSensor.set_signature(1, &redSig);
     // Take snapshots for red and blue signatures
-    visionSensor.get_by_sig(RED_SIG);
+    visionSensor.get_by_sig(0, 1);
     
     // Check if any red object is detected
     if (visionSensor.get_object_count() > 0) {
