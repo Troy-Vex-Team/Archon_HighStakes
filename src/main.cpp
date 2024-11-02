@@ -109,14 +109,15 @@ void initialize() {
     chassis.turnToHeading(120,3000);
     chassis.turnToHeading(0,3000);
     chassis.moveToPoint(0, 24, 5000); //forward 24 inches
-
+    */
+   pros::delay(500);
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
         pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
         pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
         pros::delay(500);
     }
-    */
+    
 }
 
 void disabled() {} // disregard don't delete
@@ -129,7 +130,17 @@ void competition_initialize()
 void autonomous()
 {
     // set chassis pose
-    chassis.setPose(0, 0, 0);
+    chassis.setPose(-147.73, 126.329, 330);
+    chassis.moveToPoint(0, -27.5, 1000)
+
+
+    while(1) {
+        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
+        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
+        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
+        pros::delay(500);
+    }
+
 
     /*
     // start code here
@@ -200,7 +211,14 @@ void opcontrol()
     Right Arrow - score lady brown
     Y - down lady brown
     */
-
+   pros::delay(500);
+    while(1) {
+        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
+        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
+        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
+        pros::delay(500);
+    }
+    
     bool last_L1_state = false;
     while (true)
     {
