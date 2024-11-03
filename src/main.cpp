@@ -20,7 +20,7 @@ pros::Rotation verticalEnc(20);                                                 
 pros::Rotation horizontalEnc(18);                                                  // horitontal rotational sensor
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 1.5); // vertical tracking wheel
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);       // horizontal tracking wheel
-pros::Vision visionSensor(10);                                                     // vision sensor
+pros::adi::Potentiometer programSelector(3);
 
 // MOTORS
 pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
@@ -89,6 +89,18 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 
 void disabled() {} // disregard don't delete
 
+void selector() {
+    while (true) {
+        // Get the angle reading from the potentiometer
+
+        // Print the reading directly
+        pros::lcd::print(1, "Heading: %f", programSelector.get_value()/10.0); // Convert tenths to degrees
+
+        // Delay for readability
+        pros::delay(500);
+    }
+}
+
 void initialize() {
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
@@ -107,6 +119,8 @@ void initialize() {
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
+    selector();
+
     // Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::coast);
     chain.set_brake_mode(pros::MotorBrake::coast);
@@ -121,27 +135,15 @@ void initialize() {
 void autonomous()
 {
     /*
-    1 = Red Left
-    2 = Red Right
-    3 = Blue Left
-    4 = Blue Right
-    5 = Skills
+    0-40 = Red Left
+    40-80 = Red Right
+    80-120 = Blue Left
+    120-160 = Blue Right
+    160-200 = Skills
     */
-    chassis.setPose(0,0,0);
-    chassis.moveToPose(-5, 1, 5 - 25, 5000);
-    mogomech.toggle();
-    chassis.moveToPose(57, 17, -20, 5000);
-    chassis.moveToPose(142.25, 26.25, -30, 5000);
-    chassis.moveToPose(128, 21.5, -25.75, 5000);
-    chassis.moveToPose(121, 29.25, -30, 5000);
-    chassis.moveToPose(230, -16, -19, 5000);
-    chassis.turnToHeading(178.75, 5000);
-    chassis.moveToPose(228.25, -19.75, -29, 5000);
-    chassis.moveToPose(165.25, -33.75, -45, 5000);
-    chassis.moveToPose(170.75, -41, -28.5, 5000);
-    chassis.moveToPose(222.25, -36.75, -13.75, 5000);
-    chassis.moveToPose(137.25, -36.75, -24.5, 5000);
-    chassis.moveToPose(137.25, -41.75, -19, 5000);
+
+    
+    
 
     /*
     if (autonToRun == 1)
