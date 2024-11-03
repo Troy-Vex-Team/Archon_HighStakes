@@ -128,20 +128,20 @@ void autonomous()
     */
 
     chassis.setPose(0, 0, 0);
-    chassis.moveToPose(1.5, 25, -5, 5000);
+    chassis.moveToPoint(0, -27, 1000, {.forwards = false, .maxSpeed = 50}, false);
     mogomech.extend();
-    chassis.moveToPose(17, -20, 57, 5000);
-    chassis.moveToPose(-25.75, 26.25, -30, 5000);
-    chassis.moveToPose(21.5, -25.75, 128, 5000);
-    chassis.moveToPose(29.25, -30, 121, 5000);
-    chassis.moveToPose(-16, -19, 230, 5000);
-    chassis.turnToHeading(178.75, 5000);
-    chassis.moveToPose(-19.75, -29, 228.25, 5000);
-    chassis.moveToPose(-33.75, -45, 165.25, 5000);
-    chassis.moveToPose(-41, -28.5, 170.75, 5000);
-    chassis.moveToPose(-36.75, -13.75, 222.25, 5000);
-    chassis.moveToPose(-36.75, -24.5, 137.25, 5000);
-    chassis.moveToPose(-41.75, -19, 137.25, 5000);
+    chassis.moveToPoint(20.75, -15, 1000);
+    chassis.moveToPose(26.25, -30, 142.25, 1000);
+    chassis.moveToPose(21.5, -25.75, 128, 1000);
+    chassis.moveToPose(29.25, -30, 121, 1000);
+    chassis.moveToPose(-16, -19, 230, 1000);
+    chassis.turnToHeading(178.75, 1000);
+    chassis.moveToPose(-19.75, -29, 228.25, 1000);
+    chassis.moveToPose(-33.75, -45, 165.25, 1000);
+    chassis.moveToPose(-41, -28.5, 170.75, 1000);
+    chassis.moveToPose(-36.75, -13.75, 222.25, 1000);
+    chassis.moveToPose(-36.75, -24.5, 137.25, 1000);
+    chassis.moveToPose(-41.75, -19, 137.25, 1000);
     /*
 
         if (autonToRun == 1)
