@@ -19,8 +19,8 @@ pros::Imu imu(21);                                                              
 pros::Rotation verticalEnc(20);                                                    // vertical rotational sensor
 pros::Rotation horizontalEnc(18);                                                  // horitontal rotational sensor
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 1.5); // vertical tracking wheel
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);  // horizontal tracking wheel
-pros::Vision visionSensor(10); // vision sensor
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);       // horizontal tracking wheel
+pros::Vision visionSensor(10);                                                     // vision sensor
 
 // MOTORS
 pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
@@ -96,7 +96,7 @@ void initialize()
     chassis.turnToHeading(120,3000);
     chassis.turnToHeading(0,3000);
     chassis.moveToPoint(0, 24, 5000); //forward 24 inches
-    
+
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
         pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
@@ -149,8 +149,9 @@ void autonomous()
     {
         if (winPoint)
         {
-            // red left wp
-            chassis.moveToPose(-5, 1, 5 - 25, 0);
+            // red ring wp
+            chassis.moveToPoint(-5, 1.5, 0);
+            chassis.turnToHeading(-25, 0);
             mogomech.toggle();
             chassis.moveToPose(57, 17, -20, 0);
             chassis.moveToPose(142.25, 26.25, -30, 0);
@@ -167,40 +168,50 @@ void autonomous()
         }
         else
         {
-            // red left normal
+            // red ring normal
         }
     }
     if (autonToRun == 2)
     {
         if (winPoint)
         {
-            // red right wp
+            // red goal wp
+            chassis.moveToPoint(0, -30.5, 0);
+            chassis.moveToPose(-32.5, 5.5, -43.5, 0);
+            chassis.moveToPose(28.75, 7.5, -34, 0);
+            chassis.moveToPose(-92.5, 12.5, -28, 0);
+            chassis.moveToPoint(25.75, -27.25, 0);
+            chassis.moveToPose(40.25, 42.75, -9, 0);
+            chassis.turnToHeading(75, 0);
+            chassis.moveToPoint(56, -13.25, 0);
+            chassis.moveToPose(-30, 38.75, -19.5, 0);
+            chassis.moveToPose(-49.5, 49, -34, 0);
         }
         else
         {
-            // red right normal
+            // red goal normal
         }
     }
     if (autonToRun == 3)
     {
         if (winPoint)
         {
-            // blue left wp
+            // blue goal wp
         }
         else
         {
-            // blue left normal
+            // blue goal normal
         }
     }
     if (autonToRun == 4)
     {
         if (winPoint)
         {
-            // blue right wp
+            // blue ring wp
         }
         else
         {
-            // blue right normal
+            // blue ring normal
         }
     }
     if (autonToRun == 5)
