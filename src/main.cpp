@@ -89,8 +89,7 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 
 void disabled() {} // disregard don't delete
 
-void initialize()
-{
+void initialize() {
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
     chassis.turnToHeading(120,3000);
