@@ -258,6 +258,16 @@ void autonomous()
         if (winPoint)
         {
             // red goal wp
+            chassis.moveToPoint(0, -30.5, 0);
+            chassis.moveToPose(-32.5, 5.5, -43.5, 0);
+            chassis.moveToPose(28.75, 7.5, -34, 0);
+            chassis.moveToPose(-92.5, 12.5, -28, 0);
+            chassis.moveToPoint(25.75, -27.25, 0);
+            chassis.moveToPose(40.25, 42.75, -9, 0);
+            chassis.turnToHeading(75, 0);
+            chassis.moveToPoint(56, -13.25, 0);
+            chassis.moveToPose(-30, 38.75, -19.5, 0);
+            chassis.moveToPose(-49.5, 49, -34, 0);
         }
         else
         {
