@@ -15,54 +15,53 @@
 
 // CONTROLLER & SENSORS
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
-pros::Imu imu(21);                                                            // inertial sensor
-pros::Rotation verticalEnc(20);                                               // vertical rotational sensor
-pros::Rotation horizontalEnc(18);                                              // horitontal rotational sensor
+pros::Imu imu(21);                                                                 // inertial sensor
+pros::Rotation verticalEnc(20);                                                    // vertical rotational sensor
+pros::Rotation horizontalEnc(18);                                                  // horitontal rotational sensor
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 1.5); // vertical tracking wheel
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);  // horizontal tracking wheel
 pros::Vision visionSensor(10); // vision sensor
 
 // MOTORS
-pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                         // front, top, bottom (left)
-pros::MotorGroup rightMotors({19, 9, -8}, pros::MotorGearset::blue);                         // front, top, bottom (right)
-pros::Motor intake(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);              // front intake
-pros::Motor chain(-13, pros::MotorGears::blue, pros::MotorUnits::rotations);                 // chain intake
+pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
+pros::MotorGroup rightMotors({19, 9, -8}, pros::MotorGearset::blue);                      // front, top, bottom (right)
+pros::Motor intake(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // front intake
+pros::Motor chain(-13, pros::MotorGears::blue, pros::MotorUnits::rotations);              // chain intake
 pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
 
 // PNEUMATICS
-pros::adi::Pneumatics mogomech(1, true); //mobile goal mech
-pros::adi::Pneumatics doinker(2, false); //doinker mech 
+pros::adi::Pneumatics mogomech(1, true); // mobile goal mech
+pros::adi::Pneumatics doinker(2, false); // doinker mech
 
 // DRIVETRAIN SETTINGS
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
                               11.22,
                               lemlib::Omniwheel::NEW_325,
                               360,
-                              8
-);
+                              8);
 
 // LATERAL PID CONTROLLER
-lemlib::ControllerSettings linearController(7.2,    // proportional gain (kP)
-                                            .95,    // integral gain (kI)
+lemlib::ControllerSettings linearController(7.2,  // proportional gain (kP)
+                                            .95,  // integral gain (kI)
                                             33.7, // derivative gain (kD)
-                                            0.07,  // anti windup
+                                            0.07, // anti windup
                                             0,    // small error range, in inches
-                                            0,  // small error range timeout, in milliseconds
+                                            0,    // small error range timeout, in milliseconds
                                             0,    // large error range, in inches
-                                            0,  // large error range timeout, in milliseconds
-                                            0    // maximum acceleration (slew)
+                                            0,    // large error range timeout, in milliseconds
+                                            0     // maximum acceleration (slew)
 );
 
 // ANGULAR PID CONTROLLER
-lemlib::ControllerSettings angularController(5.25,  // proportional gain (kP)
-                                             1, // integral gain (kI)
+lemlib::ControllerSettings angularController(5.25, // proportional gain (kP)
+                                             1,    // integral gain (kI)
                                              44.8, // derivative gain (kD)
-                                             2,   // anti windup
-                                             0,     // small error range, in degrees
-                                             0,     // small error range timeout, in milliseconds
-                                             0,     // large error range, in degrees
-                                             0,     // large error range timeout, in milliseconds
-                                             0      // maximum acceleration (slew)
+                                             2,    // anti windup
+                                             0,    // small error range, in degrees
+                                             0,    // small error range timeout, in milliseconds
+                                             0,    // large error range, in degrees
+                                             0,    // large error range timeout, in milliseconds
+                                             0     // maximum acceleration (slew)
 );
 
 // TROTTLE INPUT CURVE
@@ -88,11 +87,12 @@ lemlib::OdomSensors sensors(&vertical,   // vertical tracking wheel
 // DRIVETRAIN
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-void initialize() {
+void initialize()
+{
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
-    //Intialize brake mode & postitions
+    // Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::coast);
     chain.set_brake_mode(pros::MotorBrake::coast);
     stakemech.set_brake_mode(pros::MotorBrake::hold);
@@ -120,18 +120,27 @@ void disabled() {} // disregard don't delete
 int autonToRun = 1;
 bool winPoint = false;
 
-const char* getAutonName(int autonNumber) {
-    switch (autonNumber) {
-        case 1: return "Red Ring Side";
-        case 2: return "Red Goal Side";
-        case 3: return "Blue Goal Side";
-        case 4: return "Blue Ring Side";
-        case 5: return "Skills";
-        default: return "None";
+const char *getAutonName(int autonNumber)
+{
+    switch (autonNumber)
+    {
+    case 1:
+        return "Red Ring Side";
+    case 2:
+        return "Red Goal Side";
+    case 3:
+        return "Blue Goal Side";
+    case 4:
+        return "Blue Ring Side";
+    case 5:
+        return "Skills";
+    default:
+        return "None";
     }
 }
 
-void displaySelectedAuton() {
+void displaySelectedAuton()
+{
     pros::lcd::clear();
     pros::lcd::print(0, "Autonomous: %s", getAutonName(autonToRun));
     pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
@@ -145,11 +154,12 @@ void detectColors() {
 }
 
 
-void competition_initialize(){
+void competition_initialize()
+{
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
-    //Intialize brake mode & postitions
+    // Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::coast);
     chain.set_brake_mode(pros::MotorBrake::coast);
     stakemech.set_brake_mode(pros::MotorBrake::hold);
@@ -158,72 +168,110 @@ void competition_initialize(){
     stakemech.set_zero_position(0);
     displaySelectedAuton();
 
-    while(true) {
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+    while (true)
+    {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+        {
             autonToRun++;
-            if (autonToRun > 5) autonToRun = 1;
+            if (autonToRun > 5)
+                autonToRun = 1;
             displaySelectedAuton();
-            pros::delay(200);
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-            autonToRun--;      
-            if (autonToRun < 1) autonToRun = 5; // Loop back to 7 if below range
-            displaySelectedAuton();
-            pros::delay(200);
-        } 
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-            winPoint = !winPoint; 
-            displaySelectedAuton();   
             pros::delay(200);
         }
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-            break;  // confirm selection
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
+        {
+            autonToRun--;
+            if (autonToRun < 1)
+                autonToRun = 5; // Loop back to 7 if below range
+            displaySelectedAuton();
+            pros::delay(200);
+        }
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+        {
+            winPoint = !winPoint;
+            displaySelectedAuton();
+            pros::delay(200);
+        }
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
+        {
+            break; // confirm selection
         }
         pros::delay(20);
     }
     pros::lcd::clear();
     pros::lcd::print(0, "Final Auton: %s", getAutonName(autonToRun));
     pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
-
 }
-
-void autonomous() {
+void autonomous()
+{
     /*
-    1 = Red Left 
+    1 = Red Left
     2 = Red Right
     3 = Blue Left
     4 = Blue Right
     5 = Skills
     */
-    if(autonToRun == 1) { 
-        if (winPoint) {
-            //red left wp
-        } else {
-            //red left normal
+    if (autonToRun == 1)
+    {
+        if (winPoint)
+        {
+            // red left wp
+            chassis.moveToPose(-5, 1, 5 - 25, 0);
+            mogomech.toggle();
+            chassis.moveToPose(57, 17, -20, 0);
+            chassis.moveToPose(142.25, 26.25, -30, 0);
+            chassis.moveToPose(128, 21.5, -25.75, 0);
+            chassis.moveToPose(121, 29.25, -30, 0);
+            chassis.moveToPose(230, -16, -19, 0);
+            chassis.turnToHeading(178.75, 0);
+            chassis.moveToPose(228.25, -19.75, -29, 0);
+            chassis.moveToPose(165.25, -33.75, -45, 0);
+            chassis.moveToPose(170.75, -41, -28.5, 0);
+            chassis.moveToPose(222.25, -36.75, -13.75, 0);
+            chassis.moveToPose(137.25, -36.75, -24.5, 0);
+            chassis.moveToPose(137.25, -41.75, -19, 0);
+        }
+        else
+        {
+            // red left normal
         }
     }
-    if(autonToRun == 2) {
-        if (winPoint) {
-            //red right wp
-        } else {
-            //red right normal
+    if (autonToRun == 2)
+    {
+        if (winPoint)
+        {
+            // red right wp
+        }
+        else
+        {
+            // red right normal
         }
     }
-    if(autonToRun == 3) {
-        if (winPoint) {
-            //blue left wp
-        } else {
-            //blue left normal
+    if (autonToRun == 3)
+    {
+        if (winPoint)
+        {
+            // blue left wp
+        }
+        else
+        {
+            // blue left normal
         }
     }
-    if(autonToRun == 4) {
-        if (winPoint) {
-            //blue right wp
-        } else {
-            //blue right normal
+    if (autonToRun == 4)
+    {
+        if (winPoint)
+        {
+            // blue right wp
+        }
+        else
+        {
+            // blue right normal
         }
     }
-    if(autonToRun == 5) {
-        //skills
+    if (autonToRun == 5)
+    {
+        // skills
     }
 
     // set chassis pose
@@ -288,8 +336,9 @@ void autonomous() {
     */
 }
 
-//DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/1/24
-void opcontrol() {
+// DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/1/24
+void opcontrol()
+{
     /*
     L1 - mogo
     L2 - set lady brown
@@ -299,44 +348,60 @@ void opcontrol() {
     Right Arrow - score lady brown
     Y - down lady brown
     */
-    
+
     bool last_L1_state = false;
     while (true)
     {
-        //drivetrain
+        // drivetrain
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         chassis.arcade(leftY, rightX);
 
-        //intake 
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+        // intake
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
+        {
             intake.move(-127);
             chain.move(127);
-        } else {
+        }
+        else
+        {
             intake.move(0);
             chain.move(0);
         }
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+        {
             intake.move(100);
             chain.move(-75);
         }
-        //lady brown
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+        // lady brown
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
+        {
             stakemech.move_absolute(440, 90);
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) { //move up
-            if (stakemech.get_position() > 1750) {
+        }
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
+        { // move up
+            if (stakemech.get_position() > 1750)
+            {
                 stakemech.move(-25);
-            } else{
+            }
+            else
+            {
                 stakemech.move(100);
             }
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { //move down
+        }
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
+        { // move down
             stakemech.move(-100);
-        } else if (stakemech.get_position() > 1750) {
-                stakemech.move(-25);
-        } else {
+        }
+        else if (stakemech.get_position() > 1750)
+        {
+            stakemech.move(-25);
+        }
+        else
+        {
             stakemech.move(0);
         }
-        //mogomech
+        // mogomech
         bool current_L1_state = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
         if (current_L1_state && !last_L1_state)
         {
@@ -344,8 +409,9 @@ void opcontrol() {
         }
         last_L1_state = current_L1_state;
 
-        //doinker
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+        // doinker
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
+        {
             doinker.toggle();
             pros::delay(300);
         }
