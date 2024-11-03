@@ -12,6 +12,7 @@
 #include "pros/rtos.hpp"
 #include "pros/vision.hpp"
 #include <string>
+#include <sys/types.h>
 
 // CONTROLLER & SENSORS
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
@@ -107,19 +108,17 @@ void initialize() {
     chassis.turnToHeading(120,3000);
     chassis.turnToHeading(0,3000);
     chassis.moveToPoint(0, 24, 5000); //forward 24 inches
-
-    while(1) {
-        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
-        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
-        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
-        pros::delay(500);
-    }
     */
 
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
-    selector();
+    /*while(1) {
+        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
+        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
+        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
+        pros::delay(500);
+    }
 
     // Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::coast);
@@ -127,164 +126,68 @@ void initialize() {
     stakemech.set_brake_mode(pros::MotorBrake::hold);
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
-    stakemech.set_zero_position(0);
+    stakemech.set_zero_position(0); */
+
 }
 
-void autonomous()
-{
+void autonomous() {
     /*
-    0-40 = Red Left
-    40-80 = Red Right
-    80-120 = Blue Left
-    120-160 = Blue Right
-    160-200 = Skills
+    0-100 = Red ring side
+    100-200 = Red goal side
+    200-300 = Blue goal side
+    300-410 = Blue ring side
     */
+    
+    if (0 < programSelector.get_value()/10.0 <= 100.0) {
+        //red ring side
+    } else if (100.0 < programSelector.get_value()/10.0 <= 200.0) {
+        //red goal side
+    } else if (200.0 < programSelector.get_value()/10.0 <= 300.0) {
+        //blue goal side
+    } else if (300.0 < programSelector.get_value()/10.0 <= 410.0) {
+        //blue ring side
+    }
 
+    intake.move(-127);
+    chain.move(120);
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0, -27, 1000, {.forwards = false, .maxSpeed = 50}, false);
-    mogomech.extend();
-    chassis.moveToPoint(20.75, -15, 1000);
-    chassis.moveToPose(26.25, -30, 142.25, 1000);
-    chassis.moveToPose(21.5, -25.75, 128, 1000);
-    chassis.moveToPose(29.25, -30, 121, 1000);
-    chassis.moveToPose(-16, -19, 230, 1000);
-    chassis.turnToHeading(178.75, 1000);
-    chassis.moveToPose(-19.75, -29, 228.25, 1000);
-    chassis.moveToPose(-33.75, -45, 165.25, 1000);
-    chassis.moveToPose(-41, -28.5, 170.75, 1000);
-    chassis.moveToPose(-36.75, -13.75, 222.25, 1000);
-    chassis.moveToPose(-36.75, -24.5, 137.25, 1000);
-    chassis.moveToPose(-41.75, -19, 137.25, 1000);
-    /*
+    chassis.moveToPoint(0, -27.25, 1500, {.forwards=false, .maxSpeed=70});
+    mogomech.retract(); //clamp mogo #1
+    chassis.turnToHeading(56.5, 1500, {.maxSpeed=80});
+    chassis.moveToPoint(16, -21, 1500); // ring 2
+    chassis.swingToHeading(144, lemlib::DriveSide::RIGHT, 1500);
+    chassis.moveToPoint(31.5, -28.5, 1500);
+    chassis.moveToPose(29.25, -21.5,181.75, 1500, {.forwards=false});
+    chassis.moveToPoint(26.75, -35, 1500);
+    chassis.swingToHeading(44, lemlib::DriveSide::RIGHT, 1500, {.maxSpeed=80});
+    chassis.moveToPoint(-36.75, -35, 1500, {.forwards=false, .maxSpeed=70});
 
-        if (autonToRun == 1)
-        {
-            if (winPoint)
-            {
-                // red ring wp
 
-            }
-            else
-            {
-                // red ring normal
-            }
-        }
-        if (autonToRun == 2)
-        {
-            if (winPoint)
-            {
-                // red goal wp
-                chassis.moveToPoint(0, -30.5, 0);
-                chassis.moveToPose(5.5, -43.5, -32.5, 0);
-                chassis.moveToPose(7.5, -34, 28.75, 0);
-                chassis.moveToPose(12.5, -28, -92.5, 0);
-                chassis.moveToPoint(25.75, -27.25, 0);
-                chassis.moveToPose(42.75, -9, 40.25, 0);
-                chassis.turnToHeading(75, 0);
-                chassis.moveToPoint(56, -13.25, 0);
-                chassis.moveToPose(38.75, -19.5, -30, 0);
-                chassis.moveToPose(49, -34, -49.5, 0);
-            }
-            else
-            {
-                // red goal normal
-            }
-        }
 
-    */
-    /*
-    if (autonToRun == 3)
-    {
-        if (winPoint)
-        {
-            // blue goal wp
-        }
-        else
-        {
-            // blue goal normal
-        }
-    }
-    if (autonToRun == 4)
-    {
-        if (winPoint)
-        {
-            // blue ring wp
-        }
-        else
-        {
-            // blue ring normal
-        }
-    }
-    if (autonToRun == 5)
-    {
-        // skills
-    }
-
-    // set chassis pose
-    chassis.setPose(-147.73, 126.329, 330);
-    chassis.moveToPoint(0, -27.5, 1000);
 
     /*
-    // start code here
-    // score pre load
-    intake.move(127);
-    chain.move(110);
-    pros::delay(600);
-    // 1st quadrant
-    chassis.moveToPoint(0, 14, 4000, {.maxSpeed = 80});
-    chassis.turnToHeading(-90, 1000, {.maxSpeed = 90});
+    chassis.moveToPoint(-17.5, -30.25, 2000, {.forwards = false, .maxSpeed = 30}, false);
     mogomech.retract();
-    chassis.moveToPoint(31, 18, 4000, {.forwards = false, .maxSpeed = 50}, false);
-    // pick up mogo one
-    mogomech.extend();
-    pros::delay(300);
-    chassis.turnToHeading(0, 1000, {.maxSpeed = 90});
-    chassis.moveToPoint(23.5, 42, 4000, {.maxSpeed = 55}, false);
+    //going to first stack
+    chassis.moveToPoint(6.5, -26.5, 1000);
+    chassis.moveToPoint(3, -25.25, 1000,{.forwards=false});
+    //going to left two stack
+    chassis.moveToPose(3, -51, 180, 1000);
     pros::delay(500);
-    chassis.turnToHeading(56.5, 1000, {.maxSpeed = 70});
-    chassis.moveToPoint(52, 64, 4000, {.maxSpeed = 55});
-    chassis.moveToPoint(38.5, 60, 4000, {.forwards = false, .maxSpeed = 55});
-    chassis.turnToHeading(180, 1000, {.maxSpeed = 50});
-    chassis.moveToPoint(46, 12.75, 4000, {.maxSpeed = 40});
-    checkIntakeChain();
-    chassis.moveToPose(30, 25, 90, 2500, {.forwards = false, .maxSpeed = 70});
-    chassis.moveToPoint(46, 16, 4000, {.maxSpeed = 50});
-    checkIntakeChain();
-    chassis.turnToHeading(-22, 1000, {.maxSpeed = 70});
-    chassis.moveToPoint(63, 1, 4000, {.forwards = false, .maxSpeed = 70}, false);
-    // drop mogo 1
-    mogomech.retract();
-
-    // 4th quadrant
-    chassis.moveToPose(20, 13, 90, 3000);
-    chassis.moveToPoint(-27, 16.5, 4000, {.forwards = false, .maxSpeed = 55}, false);
-    // pick up mogo 2
+    //prepare for right two stack
+    chassis.moveToPose(6.5,-25,180,1000,{.forwards = false, .maxSpeed = 100});
+    //go to right two stack
+    chassis.moveToPose(14, -43.25,180, 1000);
+    //go to middle red
+    chassis.moveToPose(-38,0,-90,2500,{.forwards = false, .maxSpeed = 100});
     mogomech.extend();
-    pros::delay(300);
-    chassis.turnToHeading(0, 1000, {.maxSpeed = 90});
-    chassis.moveToPoint(-23.5, 42, 4000, {.maxSpeed = 55}, false);
-    pros::delay(500);
-    chassis.turnToHeading(-56.5, 1000, {.maxSpeed = 70});
-    chassis.moveToPoint(-52, 64, 4000, {.maxSpeed = 55});
-    chassis.moveToPoint(-40, 60, 4000, {.forwards = false, .maxSpeed = 55});
-    chassis.turnToHeading(-180, 1000, {.maxSpeed = 50});
-    chassis.moveToPoint(-45, 12.75, 4000, {.maxSpeed = 40});
-    checkIntakeChain();
-    chassis.moveToPose(-30, 22, -90, 2500, {.forwards = false, .maxSpeed = 70});
-    chassis.moveToPoint(-48, 12, 4000, {.maxSpeed = 50});
-    checkIntakeChain();
-    chassis.turnToHeading(22, 1000, {.maxSpeed = 70});
-    chassis.moveToPoint(-63, -4, 4000, {.forwards = false, .maxSpeed = 70}, false);
-    // drop mogo 2
-    mogomech.retract();
-    // end code here
-    pros::lcd::print(1, "Autonomous Routine Finished");
+    doinker.extend();
     */
+    
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/1/24
-void opcontrol()
-{
+void opcontrol() {
     /*
     L1 - mogo
     L2 - set lady brown
