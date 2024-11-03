@@ -235,18 +235,18 @@ void autonomous()
             chassis.moveToPoint(-5, 1.5, 0);
             chassis.turnToHeading(-25, 0);
             mogomech.toggle();
-            chassis.moveToPose(57, 17, -20, 0);
-            chassis.moveToPose(142.25, 26.25, -30, 0);
-            chassis.moveToPose(128, 21.5, -25.75, 0);
-            chassis.moveToPose(121, 29.25, -30, 0);
-            chassis.moveToPose(230, -16, -19, 0);
+            chassis.moveToPose(17, -20, 57, 0);
+            chassis.moveToPose(26.25, -30, 142.25, 0);
+            chassis.moveToPose(21.5, -25.75, 128, 0);
+            chassis.moveToPose(29.25, -30, 121, 0);
+            chassis.moveToPose(-16, -19, 230, 0);
             chassis.turnToHeading(178.75, 0);
-            chassis.moveToPose(228.25, -19.75, -29, 0);
-            chassis.moveToPose(165.25, -33.75, -45, 0);
-            chassis.moveToPose(170.75, -41, -28.5, 0);
-            chassis.moveToPose(222.25, -36.75, -13.75, 0);
-            chassis.moveToPose(137.25, -36.75, -24.5, 0);
-            chassis.moveToPose(137.25, -41.75, -19, 0);
+            chassis.moveToPose(-19.75, -29, 228.25, 0);
+            chassis.moveToPose(-33.75, -45, 165.25, 0);
+            chassis.moveToPose(-41, -28.5, 170.75, 0);
+            chassis.moveToPose(-36.75, -13.75, 222.25, 0);
+            chassis.moveToPose(-36.75, -24.5, 137.25, 0);
+            chassis.moveToPose(-41.75, -19, 137.25, 0);
         }
         else
         {
@@ -259,15 +259,15 @@ void autonomous()
         {
             // red goal wp
             chassis.moveToPoint(0, -30.5, 0);
-            chassis.moveToPose(-32.5, 5.5, -43.5, 0);
-            chassis.moveToPose(28.75, 7.5, -34, 0);
-            chassis.moveToPose(-92.5, 12.5, -28, 0);
-            chassis.moveToPoint(25.75, -27.25, 0);
-            chassis.moveToPose(40.25, 42.75, -9, 0);
+            chassis.moveToPose(5.5, -43.5, -32.5, 0);
+            chassis.moveToPose(7.5, -34, 28.75, 0);
+            chassis.moveToPose(12.5, -28, -92.5, 0);
+            chassis.moveToPoint(-27.25, 25.75, 0);
+            chassis.moveToPose(42.75, -9, 40.25, 0);
             chassis.turnToHeading(75, 0);
             chassis.moveToPoint(56, -13.25, 0);
-            chassis.moveToPose(-30, 38.75, -19.5, 0);
-            chassis.moveToPose(-49.5, 49, -34, 0);
+            chassis.moveToPose(38.75, -19.5, -30, 0);
+            chassis.moveToPose(49, -34, -49.5, 0);
         }
         else
         {
