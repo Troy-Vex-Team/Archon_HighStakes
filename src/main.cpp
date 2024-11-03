@@ -115,7 +115,7 @@ void initialize() {
         pros::delay(500);
     }
     */
-    
+
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
@@ -128,8 +128,6 @@ void initialize() {
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
     stakemech.set_zero_position(0);
-
-
 }
 
 void autonomous()
@@ -142,57 +140,59 @@ void autonomous()
     160-200 = Skills
     */
 
-    
-    
-
+    chassis.setPose(0, 0, 0);
+    chassis.moveToPoint(0, -27, 1000, {.forwards = false, .maxSpeed = 50}, false);
+    mogomech.extend();
+    chassis.moveToPoint(20.75, -15, 1000);
+    chassis.moveToPose(26.25, -30, 142.25, 1000);
+    chassis.moveToPose(21.5, -25.75, 128, 1000);
+    chassis.moveToPose(29.25, -30, 121, 1000);
+    chassis.moveToPose(-16, -19, 230, 1000);
+    chassis.turnToHeading(178.75, 1000);
+    chassis.moveToPose(-19.75, -29, 228.25, 1000);
+    chassis.moveToPose(-33.75, -45, 165.25, 1000);
+    chassis.moveToPose(-41, -28.5, 170.75, 1000);
+    chassis.moveToPose(-36.75, -13.75, 222.25, 1000);
+    chassis.moveToPose(-36.75, -24.5, 137.25, 1000);
+    chassis.moveToPose(-41.75, -19, 137.25, 1000);
     /*
-    if (autonToRun == 1)
-    {
-        if (winPoint)
+
+        if (autonToRun == 1)
         {
-            // red ring wp
-            chassis.moveToPoint(-5, 1.5, 0);
-            chassis.turnToHeading(-25, 0);
-            mogomech.toggle();
-            chassis.moveToPose(17, -20, 57, 0);
-            chassis.moveToPose(26.25, -30, 142.25, 0);
-            chassis.moveToPose(21.5, -25.75, 128, 0);
-            chassis.moveToPose(29.25, -30, 121, 0);
-            chassis.moveToPose(-16, -19, 230, 0);
-            chassis.turnToHeading(178.75, 0);
-            chassis.moveToPose(-19.75, -29, 228.25, 0);
-            chassis.moveToPose(-33.75, -45, 165.25, 0);
-            chassis.moveToPose(-41, -28.5, 170.75, 0);
-            chassis.moveToPose(-36.75, -13.75, 222.25, 0);
-            chassis.moveToPose(-36.75, -24.5, 137.25, 0);
-            chassis.moveToPose(-41.75, -19, 137.25, 0);
+            if (winPoint)
+            {
+                // red ring wp
+
+            }
+            else
+            {
+                // red ring normal
+            }
         }
-        else
+        if (autonToRun == 2)
         {
-            // red ring normal
+            if (winPoint)
+            {
+                // red goal wp
+                chassis.moveToPoint(0, -30.5, 0);
+                chassis.moveToPose(5.5, -43.5, -32.5, 0);
+                chassis.moveToPose(7.5, -34, 28.75, 0);
+                chassis.moveToPose(12.5, -28, -92.5, 0);
+                chassis.moveToPoint(25.75, -27.25, 0);
+                chassis.moveToPose(42.75, -9, 40.25, 0);
+                chassis.turnToHeading(75, 0);
+                chassis.moveToPoint(56, -13.25, 0);
+                chassis.moveToPose(38.75, -19.5, -30, 0);
+                chassis.moveToPose(49, -34, -49.5, 0);
+            }
+            else
+            {
+                // red goal normal
+            }
         }
-    }
-    if (autonToRun == 2)
-    {
-        if (winPoint)
-        {
-            // red goal wp
-            chassis.moveToPoint(0, -30.5, 0);
-            chassis.moveToPose(5.5, -43.5, -32.5, 0);
-            chassis.moveToPose(7.5, -34, 28.75, 0);
-            chassis.moveToPose(12.5, -28, -92.5, 0);
-            chassis.moveToPoint(-27.25, 25.75, 0);
-            chassis.moveToPose(42.75, -9, 40.25, 0);
-            chassis.turnToHeading(75, 0);
-            chassis.moveToPoint(56, -13.25, 0);
-            chassis.moveToPose(38.75, -19.5, -30, 0);
-            chassis.moveToPose(49, -34, -49.5, 0);
-        }
-        else
-        {
-            // red goal normal
-        }
-    }
+
+    */
+    /*
     if (autonToRun == 3)
     {
         if (winPoint)
