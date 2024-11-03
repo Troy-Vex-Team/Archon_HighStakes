@@ -87,19 +87,9 @@ lemlib::OdomSensors sensors(&vertical,   // vertical tracking wheel
 // DRIVETRAIN
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-void initialize()
-{
-    pros::lcd::initialize();
-    chassis.calibrate(); // calibrate sensors
+void disabled() {} // disregard don't delete
 
-    // Intialize brake mode & postitions
-    intake.set_brake_mode(pros::MotorBrake::coast);
-    chain.set_brake_mode(pros::MotorBrake::coast);
-    stakemech.set_brake_mode(pros::MotorBrake::hold);
-    leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
-    rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
-    stakemech.set_zero_position(0);
-
+void initialize() {
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
     chassis.turnToHeading(120,3000);
@@ -113,48 +103,7 @@ void initialize()
         pros::delay(500);
     }
     */
-}
-
-void disabled() {} // disregard don't delete
-
-int autonToRun = 1;
-bool winPoint = false;
-
-const char *getAutonName(int autonNumber)
-{
-    switch (autonNumber)
-    {
-    case 1:
-        return "Red Ring Side";
-    case 2:
-        return "Red Goal Side";
-    case 3:
-        return "Blue Goal Side";
-    case 4:
-        return "Blue Ring Side";
-    case 5:
-        return "Skills";
-    default:
-        return "None";
-    }
-}
-
-void displaySelectedAuton()
-{
-    pros::lcd::clear();
-    pros::lcd::print(0, "Autonomous: %s", getAutonName(autonToRun));
-    pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
-}
-
-pros::vision_signature_s_t redSig = pros::Vision::signature_from_utility(1, 0, 0, 0, 0, 0, 0, 0, 0);
-pros::vision_signature_s_t blueSig = pros::Vision::signature_from_utility(2, 0, 0, 0, 0, 0, 0, 0, 0);
-
-void detectColors()
-{
-}
-
-void competition_initialize()
-{
+    
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
 
@@ -165,59 +114,10 @@ void competition_initialize()
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
     stakemech.set_zero_position(0);
-    displaySelectedAuton();
 
-    while (true)
-    {
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
-        {
-            autonToRun++;
-            if (autonToRun > 5)
-                autonToRun = 1;
-            displaySelectedAuton();
-            pros::delay(200);
-        }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
-        {
-            autonToRun--;
-            if (autonToRun < 1)
-                autonToRun = 5; // Loop back to 7 if below range
-            displaySelectedAuton();
-            pros::delay(200);
-        }
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-        {
-            winPoint = !winPoint;
-            displaySelectedAuton();
-            pros::delay(200);
-        }
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A))
-        {
-            break; // confirm selection
-        }
-        pros::delay(20);
-    }
-    pros::lcd::clear();
-    pros::lcd::print(0, "Final Auton: %s", getAutonName(autonToRun));
-    pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
+
 }
 
-/*
-    case 1:
-        return "Red Ring Side";
-    case 2:
-        return "Red Goal Side";
-    case 3:
-        return "Blue Goal Side";
-    case 4:
-        return "Blue Ring Side";
-    case 5:
-        return "Skills";
-    default:
-        return "None";
-    }
-
-*/
 void autonomous()
 {
     /*
@@ -227,6 +127,23 @@ void autonomous()
     4 = Blue Right
     5 = Skills
     */
+    chassis.setPose(0,0,0);
+    chassis.moveToPose(-5, 1, 5 - 25, 5000);
+    mogomech.toggle();
+    chassis.moveToPose(57, 17, -20, 5000);
+    chassis.moveToPose(142.25, 26.25, -30, 5000);
+    chassis.moveToPose(128, 21.5, -25.75, 5000);
+    chassis.moveToPose(121, 29.25, -30, 5000);
+    chassis.moveToPose(230, -16, -19, 5000);
+    chassis.turnToHeading(178.75, 5000);
+    chassis.moveToPose(228.25, -19.75, -29, 5000);
+    chassis.moveToPose(165.25, -33.75, -45, 5000);
+    chassis.moveToPose(170.75, -41, -28.5, 5000);
+    chassis.moveToPose(222.25, -36.75, -13.75, 5000);
+    chassis.moveToPose(137.25, -36.75, -24.5, 5000);
+    chassis.moveToPose(137.25, -41.75, -19, 5000);
+
+    /*
     if (autonToRun == 1)
     {
         if (winPoint)
