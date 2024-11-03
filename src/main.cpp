@@ -255,7 +255,8 @@ void autonomous()
         if (winPoint)
         {
             // red left wp
-            chassis.moveToPose(-5, 1, 5 - 25, 0);
+            chassis.moveToPoint(-5, 1.5, 0);
+            chassis.turnToHeading(-25, 0);
             mogomech.toggle();
             chassis.moveToPose(57, 17, -20, 0);
             chassis.moveToPose(142.25, 26.25, -30, 0);
@@ -273,7 +274,7 @@ void autonomous()
         else
         {
             // red left normal
-        }
+                }
     }
     if (autonToRun == 2)
     {
