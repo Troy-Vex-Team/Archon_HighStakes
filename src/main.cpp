@@ -19,8 +19,8 @@ pros::Imu imu(21);                                                              
 pros::Rotation verticalEnc(20);                                                    // vertical rotational sensor
 pros::Rotation horizontalEnc(18);                                                  // horitontal rotational sensor
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, 1.5); // vertical tracking wheel
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);  // horizontal tracking wheel
-pros::Vision visionSensor(10); // vision sensor
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);       // horizontal tracking wheel
+pros::Vision visionSensor(10);                                                     // vision sensor
 
 // MOTORS
 pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
@@ -105,7 +105,7 @@ void initialize()
     chassis.turnToHeading(120,3000);
     chassis.turnToHeading(0,3000);
     chassis.moveToPoint(0, 24, 5000); //forward 24 inches
-    
+
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
         pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
@@ -149,10 +149,9 @@ void displaySelectedAuton()
 pros::vision_signature_s_t redSig = pros::Vision::signature_from_utility(1, 0, 0, 0, 0, 0, 0, 0, 0);
 pros::vision_signature_s_t blueSig = pros::Vision::signature_from_utility(2, 0, 0, 0, 0, 0, 0, 0, 0);
 
-void detectColors() {
-
+void detectColors()
+{
 }
-
 
 void competition_initialize()
 {
@@ -202,6 +201,23 @@ void competition_initialize()
     pros::lcd::print(0, "Final Auton: %s", getAutonName(autonToRun));
     pros::lcd::print(1, "Win Point: %s", winPoint ? "ON" : "OFF");
 }
+
+/*
+    case 1:
+        return "Red Ring Side";
+    case 2:
+        return "Red Goal Side";
+    case 3:
+        return "Blue Goal Side";
+    case 4:
+        return "Blue Ring Side";
+    case 5:
+        return "Skills";
+    default:
+        return "None";
+    }
+
+*/
 void autonomous()
 {
     /*
@@ -215,7 +231,7 @@ void autonomous()
     {
         if (winPoint)
         {
-            // red left wp
+            // red ring wp
             chassis.moveToPoint(-5, 1.5, 0);
             chassis.turnToHeading(-25, 0);
             mogomech.toggle();
@@ -234,40 +250,40 @@ void autonomous()
         }
         else
         {
-            // red left normal
-                }
+            // red ring normal
+        }
     }
     if (autonToRun == 2)
     {
         if (winPoint)
         {
-            // red right wp
+            // red goal wp
         }
         else
         {
-            // red right normal
+            // red goal normal
         }
     }
     if (autonToRun == 3)
     {
         if (winPoint)
         {
-            // blue left wp
+            // blue goal wp
         }
         else
         {
-            // blue left normal
+            // blue goal normal
         }
     }
     if (autonToRun == 4)
     {
         if (winPoint)
         {
-            // blue right wp
+            // blue ring wp
         }
         else
         {
-            // blue right normal
+            // blue ring normal
         }
     }
     if (autonToRun == 5)
