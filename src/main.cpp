@@ -118,7 +118,7 @@ void initialize() {
         pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
         pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
         pros::delay(500);
-    }
+    }*/
 
     // Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::coast);
@@ -126,7 +126,7 @@ void initialize() {
     stakemech.set_brake_mode(pros::MotorBrake::hold);
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
-    stakemech.set_zero_position(0); */
+    stakemech.set_zero_position(0); 
 
 }
 
@@ -138,8 +138,20 @@ void autonomous() {
     300-410 = Blue ring side
     */
     
-    if (0 < programSelector.get_value()/10.0 <= 100.0) {
-        //red ring side
+    if (0 < programSelector.get_value()/10.0 <= 100.0) { // red ring side
+        intake.move(-127);
+        chain.move(120);
+        chassis.setPose(0, 0, 0);
+        chassis.moveToPoint(0, -27.25, 1500, {.forwards=false, .maxSpeed=70});
+        mogomech.retract(); //clamp mogo #1
+        chassis.turnToHeading(56.5, 1500, {.maxSpeed=80});
+        chassis.moveToPoint(16, -21, 1500); // ring 2
+        chassis.swingToHeading(144, lemlib::DriveSide::RIGHT, 1500);
+        chassis.moveToPoint(31.5, -28.5, 1500);
+        chassis.moveToPose(29.25, -21.5,181.75, 1500, {.forwards=false});
+        chassis.moveToPoint(26.75, -35, 1500);
+        chassis.swingToHeading(44, lemlib::DriveSide::RIGHT, 1500, {.maxSpeed=80});
+        chassis.moveToPoint(-36.75, -35, 1500, {.forwards=false, .maxSpeed=70});
     } else if (100.0 < programSelector.get_value()/10.0 <= 200.0) {
         //red goal side
     } else if (200.0 < programSelector.get_value()/10.0 <= 300.0) {
@@ -147,53 +159,16 @@ void autonomous() {
     } else if (300.0 < programSelector.get_value()/10.0 <= 410.0) {
         //blue ring side
     }
-
-    intake.move(-127);
-    chain.move(120);
-    chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0, -27.25, 1500, {.forwards=false, .maxSpeed=70});
-    mogomech.retract(); //clamp mogo #1
-    chassis.turnToHeading(56.5, 1500, {.maxSpeed=80});
-    chassis.moveToPoint(16, -21, 1500); // ring 2
-    chassis.swingToHeading(144, lemlib::DriveSide::RIGHT, 1500);
-    chassis.moveToPoint(31.5, -28.5, 1500);
-    chassis.moveToPose(29.25, -21.5,181.75, 1500, {.forwards=false});
-    chassis.moveToPoint(26.75, -35, 1500);
-    chassis.swingToHeading(44, lemlib::DriveSide::RIGHT, 1500, {.maxSpeed=80});
-    chassis.moveToPoint(-36.75, -35, 1500, {.forwards=false, .maxSpeed=70});
-
-
-
-
-    /*
-    chassis.moveToPoint(-17.5, -30.25, 2000, {.forwards = false, .maxSpeed = 30}, false);
-    mogomech.retract();
-    //going to first stack
-    chassis.moveToPoint(6.5, -26.5, 1000);
-    chassis.moveToPoint(3, -25.25, 1000,{.forwards=false});
-    //going to left two stack
-    chassis.moveToPose(3, -51, 180, 1000);
-    pros::delay(500);
-    //prepare for right two stack
-    chassis.moveToPose(6.5,-25,180,1000,{.forwards = false, .maxSpeed = 100});
-    //go to right two stack
-    chassis.moveToPose(14, -43.25,180, 1000);
-    //go to middle red
-    chassis.moveToPose(-38,0,-90,2500,{.forwards = false, .maxSpeed = 100});
-    mogomech.extend();
-    doinker.extend();
-    */
-    
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/1/24
 void opcontrol() {
     /*
     L1 - mogo
-    L2 - set lady brown
-    left - doinker
+    L2 - set lady brown (hold)
     R1 - intake up
     R2 - chain down
+    Left Arrow - doinker
     Right Arrow - score lady brown
     Y - down lady brown
     */
