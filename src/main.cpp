@@ -187,7 +187,6 @@ void initialize() {
     pros::lcd::register_btn1_cb(on_b1);
     pros::lcd::register_btn2_cb(on_b2);
 
-
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
     chassis.turnToHeading(120,3000);
