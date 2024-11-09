@@ -47,11 +47,11 @@ lemlib::ControllerSettings linearController(7.2,  // proportional gain (kP)
                                             .95,  // integral gain (kI)
                                             33.7, // derivative gain (kD)
                                             0.07, // anti windup
-                                            0,    // small error range, in inches
-                                            0,    // small error range timeout, in milliseconds
-                                            0,    // large error range, in inches
-                                            0,    // large error range timeout, in milliseconds
-                                            0     // maximum acceleration (slew)
+                                            1, // small error range, in inches
+                                            100, // small error range timeout, in milliseconds
+                                            3, // large error range, in inches
+                                            500, // large error range timeout, in milliseconds
+                                            20 // maximum acceleration (slew)
 );
 
 // ANGULAR PID CONTROLLER
@@ -103,6 +103,14 @@ void selector() {
     }
 }
 
+void checkIntakeChain() {
+    if (chain.get_voltage() != 0 && chain.get_actual_velocity() < 50)
+    {
+        chain.move_relative(-1, 600);
+    }
+    chain.move(110);
+}
+
 void initialize() {
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
@@ -139,7 +147,7 @@ void autonomous() {
     300-410 = Blue ring side
     */
     
-    if (0 < programSelector.get_value()/10.0 <= 100.0) { // red ring side
+    /* if (0 < programSelector.get_value()/10.0 <= 100.0) { // red ring side
         intake.move(-127);
         chain.move(120);
         chassis.setPose(0, 0, 0);
@@ -159,10 +167,36 @@ void autonomous() {
         //blue goal side
     } else if (300.0 < programSelector.get_value()/10.0 <= 410.0) {
         //blue ring side
-    }
+    }*/
+
+    //red ring side
+    chassis.setPose(0, 0, 0);
+    chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
+    chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
+    mogomech.retract(); //clamp mogo #1
+    pros::delay(400);
+    intake.move(-127);
+    chain.move(120);
+    chassis.turnToHeading(56.5, 1000, {.maxSpeed=50});
+    chassis.moveToPoint(16, -21, 1500, {.minSpeed=90}); // ring 2
+    chassis.swingToHeading(144, lemlib::DriveSide::RIGHT, 1000);
+    checkIntakeChain();
+    chassis.moveToPoint(29, -28.5, 2000);
+    checkIntakeChain();
+    chassis.moveToPoint(29.25, -18.5, 1000, {.forwards=false});
+    chassis.turnToHeading(181.75, 1000);
+    checkIntakeChain();
+    chassis.moveToPoint(26.75, -35, 2000);
+    checkIntakeChain();
+    pros::delay(3000);
+    chain.brake();
+    mogomech.extend();
+    chassis.swingToHeading(44, lemlib::DriveSide::RIGHT, 1500, {.maxSpeed=80});
+    stakemech.move_relative(800, 127);
+    chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
 }
 
-// DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/1/24
+// DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/8/24
 void opcontrol() {
     /*
     L1 - mogo
