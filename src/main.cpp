@@ -39,7 +39,8 @@ lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
                               11.22,
                               lemlib::Omniwheel::NEW_325,
                               360,
-                              8);
+                              8
+);
 
 // LATERAL PID CONTROLLER
 lemlib::ControllerSettings linearController(7.2,  // proportional gain (kP)
@@ -182,64 +183,42 @@ void opcontrol() {
         chassis.arcade(leftY, rightX);
 
         // intake
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
-        {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
             intake.move(-127);
             chain.move(127);
-        }
-        else
-        {
+        } else {
             intake.move(0);
             chain.move(0);
         }
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-        {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
             intake.move(100);
             chain.move(-75);
         }
         // lady brown
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
-        {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
             stakemech.move_absolute(440, 90);
-        }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
         { // move up
-            if (stakemech.get_position() > 1750)
-            {
+            if (stakemech.get_position() > 1750) {
                 stakemech.move(-25);
-            }
-            else
-            {
+            } else {
                 stakemech.move(100);
             }
-        }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
-        { // move down
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { // move down
             stakemech.move(-100);
-        }
-        else if (stakemech.get_position() > 1750)
-        {
-            stakemech.move(-25);
-        }
-        else
-        {
-            stakemech.move(0);
-        }
+        } 
         // mogomech
         bool current_L1_state = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
-        if (current_L1_state && !last_L1_state)
-        {
+        if (current_L1_state && !last_L1_state) {
             mogomech.toggle();
         }
         last_L1_state = current_L1_state;
-
         // doinker
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
-        {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
             doinker.toggle();
             pros::delay(300);
         }
 
-        pros::delay(25);
+        pros::delay(25); //controller debounce delay
     }
 }
