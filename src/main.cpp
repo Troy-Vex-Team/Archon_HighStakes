@@ -365,8 +365,6 @@ void autonomous() {
     chassis.turnToHeading(-90, 1000);
     chassis.moveToPoint(-16, -27, 1500, {.forwards=false, .minSpeed=100});
     chassis.moveToPoint(-20, 20, 1000, {.forwards=false, .maxSpeed=40});
-
-
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/8/24
