@@ -136,7 +136,6 @@ void initialize() {
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
     stakemech.set_zero_position(0); 
-
 }
 
 void autonomous() {
@@ -205,6 +204,28 @@ void autonomous() {
         */
     }    
 
+    chassis.setPose(0,0,0);
+    chassis.moveToPoint(0, -27, 2000, {.forwards=false, .minSpeed=100});
+    chassis.swingToHeading(-35, lemlib::DriveSide::RIGHT, 1000);
+    chassis.moveToPoint(5.5, -42, 1000, {.forwards=false, .maxSpeed=40});
+    mogomech.retract();
+    chain.move(120);
+    intake.move(-127);
+    pros::delay(500);
+    chassis.turnToHeading(30, 1000);
+    chassis.moveToPoint(10, -27, 1000);
+    chassis.swingToHeading(90, lemlib::DriveSide::RIGHT, 1000);
+    //add delay maybe to score 2nd ring before drop
+    mogomech.extend();
+    while(1) {
+        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
+        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
+        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
+        pros::delay(500);
+    }
+    chassis.turnToHeading(-90, 1000);
+    chassis.moveToPoint(-16, -27, 1500, {.forwards=false, .minSpeed=100});
+    chassis.moveToPoint(-20, 20, 1000, {.forwards=false, .maxSpeed=40});
 
 
 }
