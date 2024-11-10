@@ -233,6 +233,7 @@ void initialize() {
 }
 
 void autonomous() {
+    /*
     if(skills) { // skills autonomous routine 
         chassis.setPose(0, 0, 0);
         //start code here 
@@ -304,19 +305,16 @@ void autonomous() {
         //other side
         mogomech.extend();
         chassis.setPose(0,0,0); //begin second half of auton (other side)
-
-
-        chassis.moveToPoint(24,3.75,1000);
-        chassis.turnToHeading(180,1000);
-        chassis.moveToPoint(24,35.5,2000, {.forwards = false, .maxSpeed=50}, false);//take 1st mogo (with 1 blue ring)
+        chassis.turnToHeading(-150, 1000);
+        chassis.moveToPoint(22, 33, 1500, {.forwards=false, .maxSpeed=50});
         mogomech.retract();
         pros::delay(1000);
         chassis.turnToHeading(-225,2000);
-        chassis.moveToPose(-9,45,-270,2000, {.forwards = false, .minSpeed=70}, false);
+        chassis.moveToPose(-9,45,-270,2000, {.forwards = false, .minSpeed=65}, false);
         pros::delay(1000);
         mogomech.extend();
-        /*
-        chassis.moveToPoint(40,38,2000, {.minSpeed=65});
+
+        chassis.moveToPoint(39,39,2000, {.minSpeed=45});
         chassis.turnToHeading(180,1000);
         mogomech.retract();
         chassis.moveToPoint(49,45,2000, {.forwards = false}, false);
@@ -324,7 +322,7 @@ void autonomous() {
         intake.move(-127);
         chain.move(127);
         //end code here 
-        */
+
     } else { // match autons
         if(ringSide) {
             if(redSide) { //red ring side (FINISHED)
@@ -442,6 +440,26 @@ void autonomous() {
             }
         }
     } 
+    */
+    mogomech.extend();
+    chassis.setPose(0,0,0); //begin second half of auton (other side)
+    chassis.turnToHeading(-150, 1000);
+    chassis.moveToPoint(22.5, 34, 1500, {.forwards=false, .maxSpeed=60}, false);
+    mogomech.retract();
+    pros::delay(1000);
+    chassis.turnToHeading(-225,2000);
+    chassis.moveToPose(-9,45,-270,2000, {.forwards = false, .minSpeed=65}, false);
+    pros::delay(1000);
+    mogomech.extend();
+
+    chassis.moveToPoint(41.5,39,2000, {.minSpeed=45});
+    chassis.turnToHeading(180,1000);
+    mogomech.retract();
+    chassis.moveToPoint(50.5,45,2000, {.forwards = false}, false);
+    pros::delay(500);
+    intake.move(-127);
+    chain.move(127);
+    
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/8/24
@@ -482,7 +500,8 @@ void opcontrol() {
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)){ // move up
             stakemech.move(100);
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { // move down
-            stakemech.move(-100);
+            stakemech.move(-127);
+            stakemech.set_zero_position(0);
         } else {
             stakemech.move(0);
         }
