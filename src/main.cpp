@@ -33,7 +33,7 @@ pros::Motor chain(-13, pros::MotorGears::blue, pros::MotorUnits::rotations);    
 pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
 
 // PNEUMATICS
-pros::adi::Pneumatics mogomech(1, true); // mobile goal mech
+pros::adi::Pneumatics mogomech(1, false); // mobile goal mech
 pros::adi::Pneumatics doinker(2, false); // doinker mech
 
 // VARIABLES 
@@ -233,22 +233,105 @@ void initialize() {
 }
 
 void autonomous() {
-    /*
     if(skills) { // skills autonomous routine 
-        while(1){
-            pros::lcd::set_text(1, "skills");
-            pros::delay(500);
-        }
-    } else {
+        chassis.setPose(0, 0, 0);
+        //start code here 
+        //score pre load
+        intake.move(-127);
+        chain.move(127);
+        pros::delay(600);
+        // 1st quadrant 
+        chassis.moveToPoint(0, 6.75, 4000,{.minSpeed=100});
+        chassis.turnToHeading(-90, 1000,{.maxSpeed = 90});
+        mogomech.extend();
+        chassis.moveToPoint(27, 13.25, 4000,{.forwards = false, .maxSpeed = 50}, false);
+        //pick up mogo one 
+        mogomech.retract(); 
+        pros::delay(500);
+        chassis.turnToHeading(0, 1000, {.maxSpeed = 60});
+        chassis.moveToPoint(23.5, 42, 4000, {.maxSpeed = 70}, false);
+        pros::delay(500);
+        chassis.turnToHeading(56.5, 1000, {.maxSpeed = 70});
+
+        chassis.moveToPoint(55.5, 61, 4000, {.maxSpeed = 70}); // very right top ring
+        chassis.moveToPoint(45, 60, 4000, {.forwards = false, .maxSpeed = 55});
+        chassis.turnToHeading(180, 1000, {.maxSpeed = 50});
+        chassis.moveToPoint(48, 2, 4000, {.maxSpeed = 50}, false); // finish eating 3 rings
+        pros::delay(1500);
+        chassis.turnToHeading(50, 1500);
+        chassis.moveToPoint(55.5,14,1500, {.maxSpeed = 80}); // pick up fourth ring
+        pros::delay(1000);
+
+        chassis.turnToHeading(-22, 1000,{.maxSpeed = 70}); // turn to face corner
+        chassis.moveToPoint(60, 3, 1000, {.forwards = false}, false);
+        //drop mogo 1
+        chain.move(-127);
+        mogomech.extend();
+        pros::delay(500);
+
+        //4th quadrant
+        chassis.turnToHeading(-90, 1000);
+        chassis.moveToPose(20, 15, 90, 2000, {.minSpeed=80});
+        chain.move(127);
+        chassis.moveToPoint(-29, 15, 2000, {.forwards = false, .maxSpeed = 55}, false);
+        //pick up mogo 2
+        mogomech.retract();
+        pros::delay(300);
+        chassis.turnToHeading(0, 1000, {.maxSpeed = 50});
+        chassis.moveToPoint(-23.5, 40, 4000, {.maxSpeed = 50}, false);
+        pros::delay(500);
+        chassis.turnToHeading(-56.5, 1000, {.maxSpeed = 50});
+
+        chassis.moveToPoint(-54.5, 58, 4000, {.maxSpeed = 70}); // very left top ring
+        chassis.moveToPoint(-44, 60, 4000, {.forwards = false, .maxSpeed = 55});
+        chassis.turnToHeading(-180, 1000, {.maxSpeed = 50});
+        chassis.moveToPoint(-46, 2, 4000, {.maxSpeed = 50}, false); // finish eating 3 rings
+        pros::delay(1100);
+        chassis.turnToHeading(-50, 900);
+        chassis.moveToPoint(-55.5, 14, 1500, {.maxSpeed=80}); //pick up fourth ring
+        pros::delay(1000);
+
+        chassis.turnToHeading(22, 1000,{.maxSpeed = 70}); // turn to face corner
+        chassis.moveToPoint(-60, 2, 4000, {.forwards = false, .maxSpeed = 70}, false);
+        //drop mogo 2
+        chain.move(-127);
+        mogomech.extend();
+        pros::delay(500);
+        chassis.moveToPose(-47.5, 81,0,4000, {}, false);
+        chain.brake();
+        intake.move(-127);
+        
+        //other side
+        mogomech.extend();
+        chassis.setPose(0,0,0); //begin second half of auton (other side)
+        chain.move(127);
+        chassis.moveToPoint(0,3.75,1000, {.minSpeed=60});
+        chain.brake();
+        chassis.turnToHeading(90,900);
+        intake.move(-127);
+        chassis.moveToPoint(24,3.75,1000, {.minSpeed=60});
+        chassis.turnToHeading(180,1000);
+        chassis.moveToPoint(24,35.5,2000, {.forwards = false, .maxSpeed=60}, false);//take 1st mogo (with 1 blue ring)
+        mogomech.retract();
+        pros::delay(1000);
+        chassis.turnToHeading(-225,2000);
+        chassis.moveToPose(-9,45,-270,2000, {.forwards = false, .minSpeed=80}, false);
+        pros::delay(1000);
+        mogomech.extend();
+        chassis.moveToPoint(40,38,2000, {.minSpeed=65});
+        chassis.turnToHeading(180,1000);
+        mogomech.retract();
+        chassis.moveToPoint(49,45,2000, {.forwards = false}, false);
+        pros::delay(500);
+        intake.move(-127);
+        chain.move(127);
+        //end code here 
+    } else { // match autons
         if(ringSide) {
             if(redSide) { //red ring side (FINISHED)
-                while(1){
-                    pros::lcd::set_text(1, "redring");
-                    pros::delay(500);
-                }
-
                 chassis.setPose(0, 0, 0);
                 chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
+                mogomech.extend();
                 chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
                 mogomech.retract(); //clamp mogo #1
                 pros::delay(400);
@@ -272,17 +355,13 @@ void autonomous() {
                 stakemech.move_relative(800, 127);
                 chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
             } else { //blue ring side (FINISHED)
-                while(1){
-                    pros::lcd::set_text(1, "blue ring");
-                    pros::delay(500);
-                }
-
                 chassis.setPose(0, 0, 0);
                 chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
+                mogomech.extend();
                 chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
                 mogomech.retract(); //clamp mogo #1
                 pros::delay(400);
-                intake.move(-127);
+                intake.move(-127); 
                 chain.move(120);
                 chassis.turnToHeading(-56.5, 1000, {.maxSpeed=50});
                 chassis.moveToPoint(-16, -21, 1500, {.minSpeed=90}); // ring 2
@@ -303,43 +382,67 @@ void autonomous() {
                 chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
             }
         } else {
-            if(redSide) { //red goal side 
-                while(1){
-                    pros::lcd::set_text(1, "redgoal");
-                    pros::delay(500);
-                }
-            } else { //blue goal side
-                while(1){
-                    pros::lcd::set_text(1, "bluegoal");
-                    pros::delay(500);
-                }
+            if(redSide) { //red goal side (FINISHED)
+                chassis.setPose(0,0,0);
+                chassis.moveToPoint(0, -25, 2000, {.forwards=false, .minSpeed=85}, false);
+                mogomech.extend();
+                chassis.swingToHeading(-37, lemlib::DriveSide::RIGHT, 1000);
+                chassis.moveToPoint(7, -43, 1000, {.forwards=false, .maxSpeed=50}, false);
+                mogomech.retract();
+                pros::delay(300);
+                intake.move(-127);
+                chain.move(120);
+                pros::delay(500);
+                chassis.moveToPose(10, -26.75, 30, 1500, {.minSpeed=90});
+                chassis.turnToHeading(90, 1000);
+                chassis.moveToPoint(12, -26.75, 500);
+                doinker.extend();
+                pros::delay(250);
+                chain.brake();
+                mogomech.extend();
+                chassis.turnToHeading(-88.5, 1000, {}, false);
+                doinker.retract();
+                chassis.moveToPoint(31, -27.8, 1000, {.forwards=false, .maxSpeed=60}, false);
+                mogomech.retract();
+                pros::delay(750);
+                chassis.moveToPose(52, -16, 22.5, 3000, {.maxSpeed=80}, false);
+                chain.move(127);
+                doinker.extend();
+                pros::delay(500);
+                chassis.turnToHeading(90, 1000, {.maxSpeed=70});
+                doinker.retract();
+                chassis.moveToPoint(66, -14, 1000, {.minSpeed=80});
+                chassis.turnToHeading(200, 1000, {.maxSpeed=60}, false);
+                chassis.moveToPoint(66, -22, 1000);
+            } else { //blue goal side (FINISHED)
+                chassis.setPose(0,0,0);
+                chassis.moveToPoint(0, -25, 1000, {.forwards=false, .minSpeed=85}, false);
+                mogomech.extend();
+                chassis.swingToHeading(37, lemlib::DriveSide::RIGHT, 1000);
+                chassis.moveToPoint(-7, -43, 1000, {.forwards=false, .maxSpeed=50}, false);
+                mogomech.retract();
+                pros::delay(300);
+                intake.move(-127);
+                chain.move(120);
+                pros::delay(500);
+                chassis.moveToPose(-10, -26.75, -30, 1500, {.minSpeed=90});
+                chassis.turnToHeading(90, 1000);
+                chassis.moveToPoint(-12, -26.75, 500);
+                doinker.extend();
+                pros::delay(250);
+                chain.brake();
+                mogomech.extend();
+                chassis.turnToHeading(-88.5, 1000, {}, false);
+                doinker.retract();
+                chassis.moveToPoint(-31, -27.8, 1000, {.forwards=false, .maxSpeed=60}, false);
+                mogomech.retract();
+                pros::delay(750);
+                chain.move(120);
+                stakemech.move_relative(800, 127);
+                chassis.moveToPoint(-40, -27.8, 2000);
             }
         }
-    }*/
-    
-    chassis.setPose(0,0,0);
-    chassis.moveToPoint(0, -27, 2000, {.forwards=false, .minSpeed=100});
-    chassis.swingToHeading(-35, lemlib::DriveSide::RIGHT, 1000);
-    chassis.moveToPoint(5.5, -42, 1000, {.forwards=false, .maxSpeed=40});
-    mogomech.retract();
-    chain.move(120);
-    intake.move(-127);
-    pros::delay(500);
-    chassis.turnToHeading(30, 1000);
-    chassis.moveToPoint(10, -27, 1000);
-    chassis.swingToHeading(90, lemlib::DriveSide::RIGHT, 1000);
-    //add delay maybe to score 2nd ring before drop
-    mogomech.extend();
-    while(1) {
-        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
-        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
-        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
-        pros::delay(500);
-    }
-    chassis.turnToHeading(-90, 1000);
-    chassis.moveToPoint(-16, -27, 1500, {.forwards=false, .minSpeed=100});
-    chassis.moveToPoint(-20, 20, 1000, {.forwards=false, .maxSpeed=40});
-    
+    } 
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/8/24
@@ -375,18 +478,15 @@ void opcontrol() {
             chain.move(-75);
         }
         // lady brown
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-            stakemech.move_absolute(440, 90);
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
-        { // move up
-            if (stakemech.get_position() > 1750) {
-                stakemech.move(-25);
-            } else {
-                stakemech.move(100);
-            }
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // set
+            stakemech.move_absolute(480, 90); 
+        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)){ // move up
+            stakemech.move(100);
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { // move down
             stakemech.move(-100);
-        } 
+        } else {
+            stakemech.move(0);
+        }
         // mogomech
         bool current_L1_state = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
         if (current_L1_state && !last_L1_state) {
