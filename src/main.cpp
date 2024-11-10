@@ -233,7 +233,7 @@ void initialize() {
 }
 
 void autonomous() {
-    /*
+    
     if(skills) { // skills autonomous routine 
         chassis.setPose(0, 0, 0);
         //start code here 
@@ -306,7 +306,7 @@ void autonomous() {
         mogomech.extend();
         chassis.setPose(0,0,0); //begin second half of auton (other side)
         chassis.turnToHeading(-150, 1000);
-        chassis.moveToPoint(22, 33, 1500, {.forwards=false, .maxSpeed=50});
+        chassis.moveToPoint(22.5, 34, 1500, {.forwards=false, .maxSpeed=60}, false);
         mogomech.retract();
         pros::delay(1000);
         chassis.turnToHeading(-225,2000);
@@ -314,14 +314,13 @@ void autonomous() {
         pros::delay(1000);
         mogomech.extend();
 
-        chassis.moveToPoint(39,39,2000, {.minSpeed=45});
+        chassis.moveToPoint(41.5,39,2000, {.minSpeed=45});
         chassis.turnToHeading(180,1000);
         mogomech.retract();
-        chassis.moveToPoint(49,45,2000, {.forwards = false}, false);
+        chassis.moveToPoint(50.5,45,2000, {.forwards = false}, false);
         pros::delay(500);
         intake.move(-127);
         chain.move(127);
-        //end code here 
 
     } else { // match autons
         if(ringSide) {
@@ -440,25 +439,6 @@ void autonomous() {
             }
         }
     } 
-    */
-    mogomech.extend();
-    chassis.setPose(0,0,0); //begin second half of auton (other side)
-    chassis.turnToHeading(-150, 1000);
-    chassis.moveToPoint(22.5, 34, 1500, {.forwards=false, .maxSpeed=60}, false);
-    mogomech.retract();
-    pros::delay(1000);
-    chassis.turnToHeading(-225,2000);
-    chassis.moveToPose(-9,45,-270,2000, {.forwards = false, .minSpeed=65}, false);
-    pros::delay(1000);
-    mogomech.extend();
-
-    chassis.moveToPoint(41.5,39,2000, {.minSpeed=45});
-    chassis.turnToHeading(180,1000);
-    mogomech.retract();
-    chassis.moveToPoint(50.5,45,2000, {.forwards = false}, false);
-    pros::delay(500);
-    intake.move(-127);
-    chain.move(127);
     
 }
 
