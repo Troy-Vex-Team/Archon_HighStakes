@@ -4,6 +4,7 @@
 #include "liblvgl/llemu.hpp"
 #include "pros/abstract_motor.hpp"
 #include "pros/adi.hpp"
+#include "pros/device.hpp"
 #include "pros/llemu.hpp"
 #include "pros/misc.h"
 #include "pros/motors.h"
@@ -34,6 +35,14 @@ pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits:
 // PNEUMATICS
 pros::adi::Pneumatics mogomech(1, true); // mobile goal mech
 pros::adi::Pneumatics doinker(2, false); // doinker mech
+
+// VARIABLES 
+int menuState = 0;
+bool ringSide = false;
+bool goalSide = false;
+bool redSide = false;
+bool blueSide = false;
+bool skills = false;
 
 // DRIVETRAIN SETTINGS
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors,
@@ -90,12 +99,6 @@ lemlib::OdomSensors sensors(&vertical,   // vertical tracking wheel
 // DRIVETRAIN
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
 
-int menu_state = 0;
-bool ringside = false;
-bool goalside = false;
-bool redside = false;
-bool blueside = false;
-
 void disabled() {} // disregard don't delete
 
 void selector() {
@@ -118,65 +121,83 @@ void checkIntakeChain() {
     chain.move(110);
 }
 
+// AUTON SELECTOR GUI
 void print_menu() {
-    if(menu_state == 0) {
-        pros::lcd::set_text(1, "1. Ringside");
-        pros::lcd::set_text(2, "2. Goalside");
+    if(menuState == 0) {
+        pros::lcd::set_text(1, "1. Ring Side");
+        pros::lcd::set_text(2, "2. Goal Side");
+        pros::lcd::set_text(3, "3. Skills");
+        pros::lcd::clear_line(4);
     }
-    if(menu_state == 1) {
-        pros::lcd::set_text(1, "1. Red Side");
-        pros::lcd::set_text(2, "2. Blue Side");
+    if(menuState == 1) {
+        pros::lcd::set_text(1, "1. Red");
+        pros::lcd::set_text(2, "2. Blue");
+        pros::lcd::clear_line(3);
+        pros::lcd::set_text(4, "3. Restart Configuration");
+
     }
-    if(menu_state == 2) {
+    if(menuState == 2) {
         pros::lcd::set_text(1, "Current Configuration:");
-        if(goalside) {
-            if(redside) {
-                pros::lcd::set_text(2, "Red Goalside");
-            } else {
-            pros::lcd::set_text(2, "Blue Goalside");
-            }
+        if(skills){
+            pros::lcd::set_text(2, "Skills");
+
         } else {
-        if(redside) {
-                pros::lcd::set_text(2, "Red Ringside");
+            if(goalSide) {
+                if(redSide) {
+                    pros::lcd::set_text(2, "Red Goal Side");
+                } else {
+                pros::lcd::set_text(2, "Blue Goal Side");
+                }
             } else {
-            pros::lcd::set_text(2, "Blue Ringside");
+                if(redSide) {
+                    pros::lcd::set_text(2, "Red Ring Side");
+                } else {
+                    pros::lcd::set_text(2, "Blue Ring Side");
+                }
             }
         }
+        pros::lcd::clear_line(3);
+        pros::lcd::set_text(4, "3. Restart Configuration");
     }
-    pros::lcd::set_text(4, "3. Reset");
 }
 
-void on_b0() {
-    if(menu_state == 1) {
-        redside = true;
-        menu_state = 2;
+void on_b0() { // LEFT BUTTON
+    if(menuState == 1) {
+        redSide = true;
+        menuState = 2;
     }
-    if(menu_state == 0) {
-        ringside = true;
-        menu_state = 1;
+    if(menuState == 0) {
+        ringSide = true;
+        menuState = 1;
     }
     print_menu();
 }
-
-void on_b1() {
-    if(menu_state == 1) {
-        blueside = true;
-        menu_state = 2;
+void on_b1() { // MIDDLE BUTTON
+    if(menuState == 1) {
+        blueSide = true;
+        menuState = 2;
     }
-    if(menu_state == 0) {
-        goalside = true;
-        menu_state = 1;
+    if(menuState == 0) {
+        goalSide = true;
+        menuState = 1;
     }
     print_menu();
 }
-
-void on_b2() {
-    redside = false;
-    blueside = false;
-    goalside = false;
-    ringside = false;
-    menu_state = false;
-    print_menu();
+void on_b2() { // RIGHT BUTTON
+    if(menuState == 0) {
+        skills = true;
+        menuState = 2;
+        print_menu();
+    } else {
+        redSide = false;
+        blueSide = false;
+        goalSide = false;
+        ringSide = false;
+        menuState = false;
+        skills = false;
+        print_menu();
+    }
+    
 }
 
 void initialize() {
@@ -186,6 +207,7 @@ void initialize() {
     pros::lcd::register_btn0_cb(on_b0);
     pros::lcd::register_btn1_cb(on_b1);
     pros::lcd::register_btn2_cb(on_b2);
+    chassis.calibrate(); // calibrate sensors
 
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
@@ -193,7 +215,6 @@ void initialize() {
     chassis.turnToHeading(0,3000);
     chassis.moveToPoint(0, 24, 5000); //forward 24 inches
     */
-    chassis.calibrate(); // calibrate sensors
 
     /*while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
@@ -201,13 +222,6 @@ void initialize() {
         pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
         pros::delay(500);
     }*/
-
-    /*PID Tuning Setup
-    chassis.setPose(0,0,0); // coordinates + heading to 0
-    chassis.turnToHeading(120,3000);
-    chassis.turnToHeading(0,3000);
-    chassis.moveToPoint(0, 24, 5000); //forward 24 inches
-    */
 
     // Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::coast);
@@ -219,130 +233,90 @@ void initialize() {
 }
 
 void autonomous() {
-    if(ringside) {
-        if(redside) {
-            chassis.setPose(0, 0, 0);
-            chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
-            chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
-            mogomech.retract(); //clamp mogo #1
-            pros::delay(400);
-            intake.move(-127);
-            chain.move(120);
-            chassis.turnToHeading(56.5, 1000, {.maxSpeed=50});
-            chassis.moveToPoint(16, -21, 1500, {.minSpeed=90}); // ring 2
-            chassis.swingToHeading(144, lemlib::DriveSide::RIGHT, 1000);
-            checkIntakeChain();
-            chassis.moveToPoint(29, -28.5, 2000);
-            checkIntakeChain();
-            chassis.moveToPoint(29.25, -18.5, 1000, {.forwards=false});
-            chassis.turnToHeading(181.75, 1000);
-            checkIntakeChain();
-            chassis.moveToPoint(26.75, -35, 2000);
-            checkIntakeChain();
-            pros::delay(3000);
-            chain.brake();
-            mogomech.extend();
-            chassis.swingToHeading(44, lemlib::DriveSide::RIGHT, 1500, {.maxSpeed=80});
-            stakemech.move_relative(800, 127);
-            chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
-        } else {
-            chassis.setPose(0, 0, 0);
-            chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
-            chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
-            mogomech.retract(); //clamp mogo #1
-            pros::delay(400);
-            intake.move(-127);
-            chain.move(120);
-            chassis.turnToHeading(-56.5, 1000, {.maxSpeed=50});
-            chassis.moveToPoint(-16, -21, 1500, {.minSpeed=90}); // ring 2
-            chassis.swingToHeading(-144, lemlib::DriveSide::LEFT, 1000);
-            checkIntakeChain();
-            chassis.moveToPoint(-29, -28.5, 2000);
-            checkIntakeChain();
-            chassis.moveToPoint(-29.25, -18.5, 1000, {.forwards=false});
-            chassis.turnToHeading(-181.75, 1000);
-            checkIntakeChain();
-            chassis.moveToPoint(-26.75, -35, 2000);
-            checkIntakeChain();
-            pros::delay(3000);
-            chain.brake();
-            mogomech.extend();
-            chassis.swingToHeading(-44, lemlib::DriveSide::LEFT, 1500, {.maxSpeed=80});
-            stakemech.move_relative(800, 127);
-            chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
+    /*
+    if(skills) { // skills autonomous routine 
+        while(1){
+            pros::lcd::set_text(1, "skills");
+            pros::delay(500);
         }
     } else {
-        if(redside) {
+        if(ringSide) {
+            if(redSide) { //red ring side (FINISHED)
+                while(1){
+                    pros::lcd::set_text(1, "redring");
+                    pros::delay(500);
+                }
 
+                chassis.setPose(0, 0, 0);
+                chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
+                chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
+                mogomech.retract(); //clamp mogo #1
+                pros::delay(400);
+                intake.move(-127);
+                chain.move(120);
+                chassis.turnToHeading(56.5, 1000, {.maxSpeed=50});
+                chassis.moveToPoint(16, -21, 1500, {.minSpeed=90}); // ring 2
+                chassis.swingToHeading(144, lemlib::DriveSide::RIGHT, 1000);
+                checkIntakeChain();
+                chassis.moveToPoint(29, -28.5, 2000);
+                checkIntakeChain();
+                chassis.moveToPoint(29.25, -18.5, 1000, {.forwards=false});
+                chassis.turnToHeading(181.75, 1000);
+                checkIntakeChain();
+                chassis.moveToPoint(26.75, -35, 2000);
+                checkIntakeChain();
+                pros::delay(3000);
+                chain.brake();
+                mogomech.extend();
+                chassis.swingToHeading(44, lemlib::DriveSide::RIGHT, 1500, {.maxSpeed=80});
+                stakemech.move_relative(800, 127);
+                chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
+            } else { //blue ring side (FINISHED)
+                while(1){
+                    pros::lcd::set_text(1, "blue ring");
+                    pros::delay(500);
+                }
+
+                chassis.setPose(0, 0, 0);
+                chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
+                chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
+                mogomech.retract(); //clamp mogo #1
+                pros::delay(400);
+                intake.move(-127);
+                chain.move(120);
+                chassis.turnToHeading(-56.5, 1000, {.maxSpeed=50});
+                chassis.moveToPoint(-16, -21, 1500, {.minSpeed=90}); // ring 2
+                chassis.swingToHeading(-144, lemlib::DriveSide::LEFT, 1000);
+                checkIntakeChain();
+                chassis.moveToPoint(-29, -28.5, 2000);
+                checkIntakeChain();
+                chassis.moveToPoint(-29.25, -18.5, 1000, {.forwards=false});
+                chassis.turnToHeading(-181.75, 1000);
+                checkIntakeChain();
+                chassis.moveToPoint(-26.75, -35, 2000);
+                checkIntakeChain();
+                pros::delay(3000);
+                chain.brake();
+                mogomech.extend();
+                chassis.swingToHeading(-44, lemlib::DriveSide::LEFT, 1500, {.maxSpeed=80});
+                stakemech.move_relative(800, 127);
+                chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
+            }
         } else {
-
+            if(redSide) { //red goal side 
+                while(1){
+                    pros::lcd::set_text(1, "redgoal");
+                    pros::delay(500);
+                }
+            } else { //blue goal side
+                while(1){
+                    pros::lcd::set_text(1, "bluegoal");
+                    pros::delay(500);
+                }
+            }
         }
-    }
-    /*
-    0-100 = Red ring side
-    100-200 = Red goal side
-    200-300 = Blue goal side
-    300-410 = Blue ring side
-    */
+    }*/
     
-    if (0 < programSelector.get_value()/10.0 <= 100.0) { // red ring side (FINISHED)
-        /*chassis.setPose(0, 0, 0);
-        chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
-        chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
-        mogomech.retract(); //clamp mogo #1
-        pros::delay(400);
-        intake.move(-127);
-        chain.move(120);
-        chassis.turnToHeading(56.5, 1000, {.maxSpeed=50});
-        chassis.moveToPoint(16, -21, 1500, {.minSpeed=90}); // ring 2
-        chassis.swingToHeading(144, lemlib::DriveSide::RIGHT, 1000);
-        checkIntakeChain();
-        chassis.moveToPoint(29, -28.5, 2000);
-        checkIntakeChain();
-        chassis.moveToPoint(29.25, -18.5, 1000, {.forwards=false});
-        chassis.turnToHeading(181.75, 1000);
-        checkIntakeChain();
-        chassis.moveToPoint(26.75, -35, 2000);
-        checkIntakeChain();
-        pros::delay(3000);
-        chain.brake();
-        mogomech.extend();
-        chassis.swingToHeading(44, lemlib::DriveSide::RIGHT, 1500, {.maxSpeed=80});
-        stakemech.move_relative(800, 127);
-        chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
-        */
-    } else if (100.0 < programSelector.get_value()/10.0 <= 200.0) { //red goal side
-        
-    } else if (200.0 < programSelector.get_value()/10.0 <= 300.0) { //blue goal side
-
-    } else if (300.0 < programSelector.get_value()/10.0 <= 410.0) { //blue ring side (FINISHED)
-        /*chassis.setPose(0, 0, 0);
-        chassis.moveToPoint(0, -16.25, 1500, {.forwards=false, .minSpeed=90});
-        chassis.moveToPoint(0, -26.25, 5000, {.forwards=false, .maxSpeed=30}, false);
-        mogomech.retract(); //clamp mogo #1
-        pros::delay(400);
-        intake.move(-127);
-        chain.move(120);
-        chassis.turnToHeading(-56.5, 1000, {.maxSpeed=50});
-        chassis.moveToPoint(-16, -21, 1500, {.minSpeed=90}); // ring 2
-        chassis.swingToHeading(-144, lemlib::DriveSide::LEFT, 1000);
-        checkIntakeChain();
-        chassis.moveToPoint(-29, -28.5, 2000);
-        checkIntakeChain();
-        chassis.moveToPoint(-29.25, -18.5, 1000, {.forwards=false});
-        chassis.turnToHeading(-181.75, 1000);
-        checkIntakeChain();
-        chassis.moveToPoint(-26.75, -35, 2000);
-        checkIntakeChain();
-        pros::delay(3000);
-        chain.brake();
-        mogomech.extend();
-        chassis.swingToHeading(-44, lemlib::DriveSide::LEFT, 1500, {.maxSpeed=80});
-        stakemech.move_relative(800, 127);
-        chassis.moveToPose(0, -57, 0, 1500, {.forwards=false, .minSpeed=80});
-        */
-    }    
-
     chassis.setPose(0,0,0);
     chassis.moveToPoint(0, -27, 2000, {.forwards=false, .minSpeed=100});
     chassis.swingToHeading(-35, lemlib::DriveSide::RIGHT, 1000);
@@ -365,6 +339,7 @@ void autonomous() {
     chassis.turnToHeading(-90, 1000);
     chassis.moveToPoint(-16, -27, 1500, {.forwards=false, .minSpeed=100});
     chassis.moveToPoint(-20, 20, 1000, {.forwards=false, .maxSpeed=40});
+    
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/8/24
