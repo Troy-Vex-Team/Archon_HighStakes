@@ -241,7 +241,7 @@ void autonomous() {
         chain.move(127);
         pros::delay(600);
         // 1st quadrant 
-        chassis.moveToPoint(0, 6.75, 4000,{.minSpeed=100});
+        chassis.moveToPoint(0, 6.75, 4000,{.minSpeed=60});
         chassis.turnToHeading(-90, 1000,{.maxSpeed = 90});
         mogomech.extend();
         chassis.moveToPoint(27, 13.25, 4000,{.forwards = false, .maxSpeed = 50}, false);
@@ -251,7 +251,7 @@ void autonomous() {
         chassis.turnToHeading(0, 1000, {.maxSpeed = 60});
         chassis.moveToPoint(23.5, 42, 4000, {.maxSpeed = 70}, false);
         pros::delay(500);
-        chassis.turnToHeading(56.5, 1000, {.maxSpeed = 70});
+        chassis.turnToHeading(56.5, 1000, {.maxSpeed = 60});
 
         chassis.moveToPoint(55.5, 61, 4000, {.maxSpeed = 70}); // very right top ring
         chassis.moveToPoint(45, 60, 4000, {.forwards = false, .maxSpeed = 55});
@@ -270,25 +270,25 @@ void autonomous() {
         pros::delay(500);
 
         //4th quadrant
-        chassis.turnToHeading(-90, 1000);
-        chassis.moveToPose(20, 15, 90, 2000, {.minSpeed=80});
+        chassis.turnToHeading(-90, 1000, {}, false);
+        chassis.moveToPose(20, 15, 90, 2000, {.minSpeed=50});
         chain.move(127);
-        chassis.moveToPoint(-29, 15, 2000, {.forwards = false, .maxSpeed = 55}, false);
+        chassis.moveToPoint(-29, 15, 2000, {.forwards = false, .maxSpeed = 50}, false);
         //pick up mogo 2
         mogomech.retract();
         pros::delay(300);
-        chassis.turnToHeading(0, 1000, {.maxSpeed = 50});
+        chassis.turnToHeading(0, 1000);
         chassis.moveToPoint(-23.5, 40, 4000, {.maxSpeed = 50}, false);
         pros::delay(500);
         chassis.turnToHeading(-56.5, 1000, {.maxSpeed = 50});
 
-        chassis.moveToPoint(-54.5, 58, 4000, {.maxSpeed = 70}); // very left top ring
+        chassis.moveToPoint(-54.5, 58, 4000, {.maxSpeed = 50}); // very left top ring
         chassis.moveToPoint(-44, 60, 4000, {.forwards = false, .maxSpeed = 55});
         chassis.turnToHeading(-180, 1000, {.maxSpeed = 50});
         chassis.moveToPoint(-46, 2, 4000, {.maxSpeed = 50}, false); // finish eating 3 rings
         pros::delay(1100);
         chassis.turnToHeading(-50, 900);
-        chassis.moveToPoint(-55.5, 14, 1500, {.maxSpeed=80}); //pick up fourth ring
+        chassis.moveToPoint(-55.5, 14, 1500, {.maxSpeed=70}); //pick up fourth ring
         pros::delay(1000);
 
         chassis.turnToHeading(22, 1000,{.maxSpeed = 70}); // turn to face corner
@@ -304,20 +304,18 @@ void autonomous() {
         //other side
         mogomech.extend();
         chassis.setPose(0,0,0); //begin second half of auton (other side)
-        chain.move(127);
-        chassis.moveToPoint(0,3.75,1000, {.minSpeed=60});
-        chain.brake();
-        chassis.turnToHeading(90,900);
-        intake.move(-127);
-        chassis.moveToPoint(24,3.75,1000, {.minSpeed=60});
+
+
+        chassis.moveToPoint(24,3.75,1000);
         chassis.turnToHeading(180,1000);
-        chassis.moveToPoint(24,35.5,2000, {.forwards = false, .maxSpeed=60}, false);//take 1st mogo (with 1 blue ring)
+        chassis.moveToPoint(24,35.5,2000, {.forwards = false, .maxSpeed=50}, false);//take 1st mogo (with 1 blue ring)
         mogomech.retract();
         pros::delay(1000);
         chassis.turnToHeading(-225,2000);
-        chassis.moveToPose(-9,45,-270,2000, {.forwards = false, .minSpeed=80}, false);
+        chassis.moveToPose(-9,45,-270,2000, {.forwards = false, .minSpeed=70}, false);
         pros::delay(1000);
         mogomech.extend();
+        /*
         chassis.moveToPoint(40,38,2000, {.minSpeed=65});
         chassis.turnToHeading(180,1000);
         mogomech.retract();
@@ -326,6 +324,7 @@ void autonomous() {
         intake.move(-127);
         chain.move(127);
         //end code here 
+        */
     } else { // match autons
         if(ringSide) {
             if(redSide) { //red ring side (FINISHED)
