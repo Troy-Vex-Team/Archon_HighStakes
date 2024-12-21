@@ -26,8 +26,8 @@ lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -5.5); 
 pros::adi::Potentiometer programSelector(3);
 
 // MOTORS
-pros::MotorGroup leftMotors({-11, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
-pros::MotorGroup rightMotors({19, 9, -8}, pros::MotorGearset::blue);                      // front, top, bottom (right)
+pros::MotorGroup leftMotors({-19, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
+pros::MotorGroup rightMotors({11, 9, -8}, pros::MotorGearset::blue);                      // front, top, bottom (right)
 pros::Motor intake(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // intake
 pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
 
@@ -48,15 +48,15 @@ bool skills = false;
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 11.25, lemlib::Omniwheel::NEW_325, 360, 8);
 
 // LATERAL PID CONTROLLER
-lemlib::ControllerSettings linearController(7.2,  // proportional gain (kP)
-                                            .95,  // integral gain (kI)
-                                            33.7, // derivative gain (kD)
-                                            0.07, // anti windup
-                                            1, // small error range, in inches
-                                            100, // small error range timeout, in milliseconds
-                                            3, // large error range, in inches
-                                            500, // large error range timeout, in milliseconds
-                                            20 // maximum acceleration (slew)
+lemlib::ControllerSettings linearController(2,  // proportional gain (kP)
+                                            0,  // integral gain (kI)
+                                            10, // derivative gain (kD)
+                                            0, // anti windup
+                                            0, // small error range, in inches 1
+                                            0, // small error range timeout, in milliseconds 100
+                                            0, // large error range, in inches 3
+                                            0, // large error range timeout, in milliseconds 500
+                                            0 // maximum acceleration (slew) 20
 );
 
 // ANGULAR PID CONTROLLER
@@ -198,8 +198,8 @@ void initialize() {
     
     //PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
-    chassis.turnToHeading(45,3000);
-    //chassis.moveToPoint(0, 24, 5000); //forward 24 inches
+    //chassis.turnToHeading(45,3000);
+    chassis.moveToPoint(0, 24, 3000);
 
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
