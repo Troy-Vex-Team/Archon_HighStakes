@@ -33,7 +33,7 @@ pros::Motor intake(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations); 
 pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
 
 // PNEUMATICS
-pros::adi::Pneumatics mogomech(1, false); // mobile goal mech
+pros::adi::Pneumatics mogomech(1, true); // mobile goal mech
 pros::adi::Pneumatics doinker(2, false); // doinker mech
 pros::adi::Pneumatics intakeLift(3, false); // intake lift 
 
@@ -45,18 +45,18 @@ lemlib::ControllerSettings linearController(8.5,  // proportional gain (kP)
                                             0.6,  // integral gain (kI)
                                             40, // derivative gain (kD)
                                             0.5, // anti windup
-                                            0, // small error range, in inches 1
-                                            0, // small error range timeout, in milliseconds 100
-                                            0, // large error range, in inches 3
-                                            0, // large error range timeout, in milliseconds 500
+                                            1, // small error range, in inches 1
+                                            100, // small error range timeout, in milliseconds 100
+                                            3, // large error range, in inches 3
+                                            500, // large error range timeout, in milliseconds 500
                                             0 // maximum acceleration (slew) 20
 );
 
 // ANGULAR PID CONTROLLER
-lemlib::ControllerSettings angularController(7,// proportional gain (kP)
-                                             2,   // integral gain (kI) 2
-                                             57, // derivative gain (kD) old: 6x
-                                             0.3,   // anti windup
+lemlib::ControllerSettings angularController(8,// proportional gain (kP)
+                                             1,   // integral gain (kI) 2
+                                             67, // derivative gain (kD) old: 6x
+                                             .3,   // anti windup
                                              0,    // small error range, in degrees
                                              0,    // small error range timeout, in milliseconds
                                              0,    // large error range, in degrees
@@ -93,12 +93,14 @@ void initialize() {
 
     pros::lcd::initialize();
     chassis.calibrate(); // calibrate sensors
+
+
     
-    /*
-    //PID Tuning Setup
+    
+    /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
     chassis.turnToHeading(90,3000);
-    //chassis.moveToPoint(0, 24, 3000);
+    chassis.moveToPoint(0, 24, 3000);
 
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
@@ -106,6 +108,7 @@ void initialize() {
         pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
         pros::delay(500);
     }
+    */
 
     // Intialize brake mode & postitions
     intake.set_brake_mode(pros::MotorBrake::brake);
@@ -113,7 +116,7 @@ void initialize() {
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
     stakemech.set_zero_position(0); 
-    */
+    
 }
 
 void autonomous() {
@@ -143,15 +146,12 @@ void opcontrol() {
 
         // intake
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-            intake.move(-127);
             intake.move(127);
         } else {
             intake.move(0);
-            intake.move(0);
         }
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-            intake.move(100);
-            intake.move(-75);
+            intake.move(-100);
         }
         // lady brown
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // set
