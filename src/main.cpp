@@ -186,7 +186,6 @@ void on_b2() { // RIGHT BUTTON
 }
 
 void initialize() {
-
     pros::lcd::initialize();
     /*
     print_menu();
