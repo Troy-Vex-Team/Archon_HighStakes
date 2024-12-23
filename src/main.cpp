@@ -20,7 +20,7 @@
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::Imu imu(5);                                                                 // inertial sensor
 pros::Rotation verticalEnc(20);                                                    // vertical rotational sensor
-pros::Rotation horizontalEnc(18);                                                  // horitontal rotational sensor
+pros::Rotation horizontalEnc(-18);                                                  // horitontal rotational sensor
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -0.5); // vertical tracking wheel
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -5.5);       // horizontal tracking wheel
 pros::adi::Potentiometer programSelector(3);
@@ -48,10 +48,10 @@ bool skills = false;
 lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 11.25, lemlib::Omniwheel::NEW_325, 360, 8);
 
 // LATERAL PID CONTROLLER
-lemlib::ControllerSettings linearController(2,  // proportional gain (kP)
-                                            0,  // integral gain (kI)
-                                            10, // derivative gain (kD)
-                                            0, // anti windup
+lemlib::ControllerSettings linearController(8.5,  // proportional gain (kP)
+                                            0.6,  // integral gain (kI)
+                                            40, // derivative gain (kD)
+                                            0.5, // anti windup
                                             0, // small error range, in inches 1
                                             0, // small error range timeout, in milliseconds 100
                                             0, // large error range, in inches 3
@@ -62,8 +62,8 @@ lemlib::ControllerSettings linearController(2,  // proportional gain (kP)
 // ANGULAR PID CONTROLLER
 lemlib::ControllerSettings angularController(7,// proportional gain (kP)
                                              2,   // integral gain (kI) 2
-                                             55.3, // derivative gain (kD) old: 6x
-                                             .3,   // anti windup
+                                             57, // derivative gain (kD) old: 6x
+                                             0.3,   // anti windup
                                              0,    // small error range, in degrees
                                              0,    // small error range timeout, in milliseconds
                                              0,    // large error range, in degrees
@@ -198,8 +198,8 @@ void initialize() {
     
     //PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
-    //chassis.turnToHeading(45,3000);
-    chassis.moveToPoint(0, 24, 3000);
+    chassis.turnToHeading(90,3000);
+    //chassis.moveToPoint(0, 24, 3000);
 
     while(1) {
         pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
