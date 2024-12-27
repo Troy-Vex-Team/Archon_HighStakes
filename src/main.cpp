@@ -1,21 +1,19 @@
 #include "main.h"
 #include "lemlib/api.hpp"
 #include "lemlib/chassis/chassis.hpp"
-#include "lemlib/chassis/trackingWheel.hpp"
-#include "liblvgl/llemu.hpp"
+#include "liblvgl/core/lv_disp.h"
+#include "liblvgl/core/lv_obj.h"
+#include "liblvgl/core/lv_obj_pos.h"
+#include "liblvgl/misc/lv_area.h"
+#include "liblvgl/widgets/lv_btnmatrix.h"
 #include "pros/abstract_motor.hpp"
 #include "pros/adi.hpp"
-#include "pros/device.hpp"
-#include "pros/llemu.hpp"
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/motors.hpp"
-#include "pros/optical.h"
 #include "pros/rtos.hpp"
-#include "pros/vision.hpp"
-#include <atomic>
+#include "pros/apix.h"
 #include <string>
-#include <sys/types.h>
 
 // CONTROLLER & SENSORS
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
@@ -89,12 +87,88 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 
 void disabled() {} // disregard don't delete
 
+static lv_obj_t *auton_sel_screen = nullptr;
+static lv_obj_t *match_sel_screen = nullptr;
+static lv_obj_t *current_screen = nullptr;
+
+static const char * auton_sel_map[] = {"Match Auton", "Skill Auton", ""};
+static const char * match_sel_map[] = {"Red Side", "Blue Side", "\n",
+                                      "Ring Side", "Goal Side", "\n",
+                                      "Win Point", ""};
+
+static void event_handler(lv_event_t * e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        uint32_t id = lv_btnmatrix_get_selected_btn(obj);
+        const char * txt = lv_btnmatrix_get_btn_text(obj, id);
+        LV_LOG_USER("%s was pressed\n", txt);
+        
+        if(strcmp(txt, "Match Auton") == 0) {
+            lv_scr_load_anim(match_sel_screen, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, false);
+            current_screen = match_sel_screen;
+        }
+    }
+}
+
+static void create_auton_sel_screen() {
+    auton_sel_screen = lv_obj_create(NULL);
+    
+    lv_obj_t * auton_btnm = lv_btnmatrix_create(auton_sel_screen);
+    lv_obj_set_size(auton_btnm, 400, 192);
+    lv_btnmatrix_set_map(auton_btnm, auton_sel_map);
+    lv_obj_align(auton_btnm, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_event_cb(auton_btnm, event_handler, LV_EVENT_ALL, NULL);
+}
+
+static void create_match_sel_screen() {
+    match_sel_screen = lv_obj_create(NULL);
+
+    lv_obj_t * match_btnm = lv_btnmatrix_create(match_sel_screen);
+    lv_obj_set_size(match_btnm, 400, 170);
+    lv_btnmatrix_set_map(match_btnm, match_sel_map);
+    
+    // Make first 5 buttons checkable
+    for (int i = 0; i < 5; i++) {
+        lv_btnmatrix_set_btn_ctrl(match_btnm, i, LV_BTNMATRIX_CTRL_CHECKABLE);
+    }
+
+    lv_obj_align(match_btnm, LV_ALIGN_TOP_MID, 0, 20);
+    lv_obj_add_event_cb(match_btnm, event_handler, LV_EVENT_ALL, NULL);
+
+    lv_obj_t * confirm_btn = lv_btn_create(match_sel_screen);
+    lv_obj_t * confirm_btn_label = lv_label_create(confirm_btn);
+    lv_label_set_text(confirm_btn_label, "Confirm");
+    lv_obj_set_style_bg_color(confirm_btn, lv_palette_main(LV_PALETTE_GREEN), 0);
+    lv_obj_align(confirm_btn, LV_ALIGN_CENTER, 0, 100);
+    lv_obj_add_event_cb(confirm_btn, event_handler, LV_EVENT_ALL, NULL);
+}
+
+void lvgl_display_task_fn(void* param) {
+    while (true) {
+        lv_task_handler();
+        pros::delay(10);
+    }
+}
+
+void initialize_display() {
+    lv_init();
+    
+    // Create screens
+    create_auton_sel_screen();
+    create_match_sel_screen();
+    
+    lv_scr_load(auton_sel_screen);
+    current_screen = auton_sel_screen;
+    
+    pros::Task lvgl_task(lvgl_display_task_fn, nullptr, "LVGL Task");
+}
+
 void initialize() {
-
-    pros::lcd::initialize();
-    chassis.calibrate(); // calibrate sensors
-
-
+    chassis.calibrate();
+    
+    initialize_display();
     
     
     /*PID Tuning Setup
@@ -111,7 +185,7 @@ void initialize() {
     */
 
     // Intialize brake mode & postitions
-    intake.set_brake_mode(pros::MotorBrake::brake);
+    intake.set_brake_mode(pros::MotorBrake::coast);
     stakemech.set_brake_mode(pros::MotorBrake::hold);
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
@@ -120,8 +194,29 @@ void initialize() {
 }
 
 void autonomous() {
-
-    
+    //red ring
+    chassis.setPose(0, 0 , 0);
+    mogomech.extend();
+    chassis.moveToPoint(0, -32, 3000, {.forwards=false, .maxSpeed=70});
+    mogomech.retract(); //clamp mogo #1
+    pros::delay(300);
+    chassis.turnToHeading(130, 1000); //async??
+    pros::delay(300);
+    intake.move(127);
+    chassis.moveToPoint(14, -45, 2000, {.maxSpeed=70});
+    chassis.swingToHeading(90, DriveSide::RIGHT, 1500, {AngularDirection::CCW_COUNTERCLOCKWISE});
+    chassis.moveToPoint(34, -47, 2000, {.maxSpeed=70});
+    chassis.turnToHeading(-30, 1500);
+    chassis.moveToPoint(28, -30, 3000); //intake but dont score 4th ring
+    intake.brake(); 
+    mogomech.extend(); //release mogo mech 
+    chassis.moveToPoint(-24, 8, 3000);
+    chassis.turnToHeading(180, 1500);
+    chassis.moveToPoint(-36, 14, 3000, {.forwards=false, .maxSpeed=50}, false); 
+    intake.move(127); //score alliance stake 
+    pros::delay(500);
+    chassis.moveToPoint(-24, -34, 2000);
+    //engage stakemech to touch pole
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/8/24
