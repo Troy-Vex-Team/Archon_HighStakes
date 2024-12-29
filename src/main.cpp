@@ -108,6 +108,11 @@ static const char * team = nullptr;
 static const char * side = nullptr;
 static const char * wp = nullptr;
 
+static lv_obj_t *auton_coordinates_label = nullptr;
+static lv_obj_t *match_coordinates_label = nullptr;
+static lv_obj_t *confirmation_coordinates_label = nullptr;
+static std::atomic<bool> should_update_coordinates(true);
+
 static void create_confirmation_screen(void);
 
 static const char * auton_sel_map[] = {"Match Auton", "Skills Auton", ""};
@@ -218,10 +223,13 @@ static void create_auton_sel_screen() {
     auton_sel_screen = lv_obj_create(NULL);
 
     auton_btnm = lv_btnmatrix_create(auton_sel_screen);
-    lv_obj_set_size(auton_btnm, 400, 192);
+    lv_obj_set_size(auton_btnm, 400, 170);
     lv_btnmatrix_set_map(auton_btnm, auton_sel_map);
-    lv_obj_align(auton_btnm, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(auton_btnm, LV_ALIGN_CENTER, 0, -30);
     lv_obj_add_event_cb(auton_btnm, event_handler, LV_EVENT_ALL, NULL);
+
+    auton_coordinates_label = lv_label_create(auton_sel_screen);
+    lv_obj_align(auton_coordinates_label, LV_ALIGN_BOTTOM_LEFT, 10, -10);
 }
 
 static void create_match_sel_screen() {
@@ -245,24 +253,56 @@ static void create_match_sel_screen() {
     lv_obj_set_style_bg_color(confirm_btn, lv_palette_main(LV_PALETTE_GREEN), 0);
     lv_obj_align(confirm_btn, LV_ALIGN_CENTER, 0, 100);
     lv_obj_add_event_cb(confirm_btn, event_handler, LV_EVENT_ALL, NULL);
+
+    match_coordinates_label = lv_label_create(match_sel_screen);
+    lv_obj_align(match_coordinates_label, LV_ALIGN_BOTTOM_LEFT, 10, -10);
 }
+
 
 void lvgl_display_task_fn(void* param) {
     while (true) {
         lv_task_handler();
+
+        if (auton_coordinates_label != nullptr && should_update_coordinates) {
+            char coord_text[100];
+            snprintf(coord_text, sizeof(coord_text),
+                    "X: %.3f\nY: %.3f\nHeading: %.3f°",
+                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
+            lv_label_set_text(auton_coordinates_label, coord_text);
+        }
+
+        if (match_coordinates_label != nullptr && should_update_coordinates) {
+            char coord_text[100];
+            snprintf(coord_text, sizeof(coord_text),
+                    "X: %.3f\nY: %.3f\nHeading: %.3f°",
+                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
+            lv_label_set_text(match_coordinates_label, coord_text);
+        }
+
+        if (confirmation_coordinates_label != nullptr && should_update_coordinates) {
+            char coord_text[100];
+            snprintf(coord_text, sizeof(coord_text),
+                    "X: %.3f\nY: %.3f\nHeading: %.3f°",
+                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta;
+            lv_label_set_text(confirmation_coordinates_label, coord_text);
+        }
+
         pros::delay(10);
     }
 }
 
 static void create_confirmation_screen() {
-  confirmation_screen = lv_obj_create(NULL);
+    confirmation_screen = lv_obj_create(NULL);
 
-  char text_buffer[200];
-  snprintf(text_buffer, sizeof(text_buffer), "%s\nTeam: %s\nSide: %s\nWP: %s\n", auton_sel, team, side, wp);
+    char text_buffer[200];
+    snprintf(text_buffer, sizeof(text_buffer), "%s\nTeam: %s\nSide: %s\nWP: %s\n", auton_sel, team, side, wp);
 
-  lv_obj_t * confirm_label = lv_label_create(confirmation_screen);
-  lv_label_set_text(confirm_label, text_buffer);
-  lv_obj_align(confirm_label, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_t * confirm_label = lv_label_create(confirmation_screen);
+    lv_label_set_text(confirm_label, text_buffer);
+    lv_obj_align(confirm_label, LV_ALIGN_CENTER, 0, 0);
+
+    confirmation_coordinates_label = lv_label_create(confirmation_screen);
+    lv_obj_align(confirmation_coordinates_label, LV_ALIGN_BOTTOM_LEFT, 10, -10);
 }
 
 void initialize_display() {
@@ -307,6 +347,9 @@ void initialize() {
 }
 
 void autonomous() {
+
+
+
     if (strcmp(auton_sel, "Match Auton") == 0) {
 
         if (team == nullptr || side == nullptr || wp == nullptr) {
