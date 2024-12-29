@@ -16,6 +16,12 @@
 #include "pros/apix.h"
 #include <cstring>
 #include <string>
+#include "lemlib/chassis/trackingWheel.hpp"
+#include "pros/device.hpp"
+#include "pros/optical.h"
+#include "pros/vision.hpp"
+#include <atomic>
+#include <sys/types.h>
 
 // CONTROLLER & SENSORS
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
