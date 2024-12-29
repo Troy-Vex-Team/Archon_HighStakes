@@ -110,7 +110,6 @@ static const char * wp = nullptr;
 
 static void create_confirmation_screen(void);
 
-
 static const char * auton_sel_map[] = {"Match Auton", "Skills Auton", ""};
 static const char * match_sel_map[] = {"Red Side", "Blue Side", "\n",
                                       "Ring Side", "Goal Side", "\n",
