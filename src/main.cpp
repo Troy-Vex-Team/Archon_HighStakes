@@ -283,7 +283,7 @@ void lvgl_display_task_fn(void* param) {
             char coord_text[100];
             snprintf(coord_text, sizeof(coord_text),
                     "X: %.3f\nY: %.3f\nHeading: %.3f°",
-                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta;
+                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
             lv_label_set_text(confirmation_coordinates_label, coord_text);
         }
 
