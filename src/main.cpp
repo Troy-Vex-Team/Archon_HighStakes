@@ -258,7 +258,6 @@ static void create_match_sel_screen() {
     lv_obj_align(match_coordinates_label, LV_ALIGN_BOTTOM_LEFT, 10, -10);
 }
 
-
 void lvgl_display_task_fn(void* param) {
     while (true) {
         lv_task_handler();
