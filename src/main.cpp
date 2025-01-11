@@ -450,7 +450,31 @@ void initialize() {
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
     stakemech.set_zero_position(0); 
-    
+
+    // RED RING SIDE WITH WIN POINT
+    chassis.setPose(0, 0 , 0);
+    mogomech.retract();
+    chassis.moveToPoint(0, -32, 3000, {.forwards=false, .maxSpeed=70}, false);
+    mogomech.extend(); //clamp mogo #1
+    pros::delay(200);
+    chassis.turnToHeading(130, 1000); //async??
+    pros::delay(200);
+    stage1.move(127);
+    stage2.move(100);
+    chassis.moveToPoint(6, -41, 2000, {.maxSpeed=70});
+    chassis.turnToHeading(90, 1500, {AngularDirection::CCW_COUNTERCLOCKWISE});
+    chassis.moveToPoint(28, -47, 2000, {.maxSpeed=70});
+    chassis.turnToHeading(-28, 1000);
+    chassis.moveToPoint(28, -28, 3000, {}, false); //intake but dont score 4th ring
+    mogomech.retract(); //release mogo mech 
+    chassis.moveToPoint(-21, 8, 3000);
+    stage2.brake();
+    chassis.turnToHeading(180, 1500);
+    chassis.moveToPoint(-32, 15, 3000, {.forwards=false, .maxSpeed=50}, false); 
+    stage2.move(100); //score alliance stake 
+    pros::delay(800);
+    //stakemech
+    chassis.moveToPoint(-28, -25, 2000);
 }
 
 void autonomous() {
