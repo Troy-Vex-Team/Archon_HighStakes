@@ -406,39 +406,39 @@ void initialize_display() {
 }
 
 
-const int numStates = 3;
-//make sure these are in centidegrees (1 degree = 100 centidegrees)
-int states[numStates] = {0, 300, 2000};
-int currState = 0;
-int target = 0;
+// const int numStates = 3;
+// //make sure these are in centidegrees (1 degree = 100 centidegrees)
+// int states[numStates] = {0, 300, 2000};
+// int currState = 0;
+// int target = 0;
 
-void nextState() {
-    currState += 1;
-    if (currState == numStates) {
-        currState = 0;
-    }
-    target = states[currState];
-}
-/*
-void liftControl() {
-    double kp = 0.5;
-    double error = target - rotationSensor.get_position();
-    double velocity = kp * error;
-    lb.move(velocity);
-}
-*/
+// void nextState() {
+//     currState += 1;
+//     if (currState == numStates) {
+//         currState = 0;
+//     }
+//     target = states[currState];
+// }
+
+// void liftControl() {
+//     double kp = 0.5;
+//     double error = target - rotationSensor.get_position();
+//     double velocity = kp * error;
+//     lb.move(velocity);
+// }
+
 void initialize() {
     chassis.calibrate();
     
     initialize_display();
-/*
-    pros::Task liftControlTask([]{
-        while (true) {
-            liftControl();
-            pros::delay(10);
-        }
-    });
-*/
+
+    // pros::Task liftControlTask([]{
+    //     while (true) {
+    //         liftControl();
+    //         pros::delay(10);
+    //     }
+    // });
+    
     
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
