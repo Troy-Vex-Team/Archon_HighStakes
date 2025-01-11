@@ -5,6 +5,7 @@
 #include "liblvgl/core/lv_disp.h"
 #include "liblvgl/core/lv_obj.h"
 #include "liblvgl/core/lv_obj_pos.h"
+#include "liblvgl/extra/widgets/meter/lv_meter.h"
 #include "liblvgl/misc/lv_area.h"
 #include "liblvgl/widgets/lv_btnmatrix.h"
 #include "pros/abstract_motor.hpp"
@@ -14,6 +15,7 @@
 #include "pros/motors.hpp"
 #include "pros/rtos.hpp"
 #include "pros/apix.h"
+#include <cstdint>
 #include <cstring>
 #include <string>
 #include "lemlib/chassis/trackingWheel.hpp"
@@ -35,8 +37,10 @@ pros::adi::Potentiometer programSelector(3);
 // MOTORS
 pros::MotorGroup leftMotors({-19, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
 pros::MotorGroup rightMotors({11, 9, -8}, pros::MotorGearset::blue);                      // front, top, bottom (right)
-pros::Motor intake(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // intake
+pros::Motor s1(15, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // s1
+pros::Motor s2(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // s2
 pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
+pros::Motor stageOneIntake(15, pros::MotorGears::green, pros::v5::MotorUnits::rotations);         // s1 intake
 
 // PNEUMATICS
 pros::adi::Pneumatics mogomech(1, true); // mobile goal mech
@@ -113,6 +117,18 @@ static lv_obj_t *match_coordinates_label = nullptr;
 static lv_obj_t *confirmation_coordinates_label = nullptr;
 static std::atomic<bool> should_update_coordinates(true);
 
+lv_obj_t * speed_meter = nullptr;
+lv_meter_indicator_t * speed_indic = nullptr;
+bool speed_meter_initialized = false;
+
+double prev_x = 0;
+double prev_y = 0;
+uint32_t prev_time = 0;
+
+lv_obj_t * heading_meter;
+lv_meter_indicator_t * indic;
+static bool meter_initialized = false;
+
 static void create_confirmation_screen(void);
 
 static const char * auton_sel_map[] = {"Match Auton", "Skills Auton", ""};
@@ -150,7 +166,7 @@ static void event_handler(lv_event_t * e) {
             LV_LOG_USER("Label text: %s\n", label);
 
             if(strcmp(label, "Confirm") == 0) {
-                auton_sel = lv_btnmatrix_get_btn_text(auton_btnm, lv_btnmatrix_get_selected_btn(auton_btnm));
+                auton_sel = "Match Auton";
 
                 if(lv_btnmatrix_has_btn_ctrl(match_btnm, 0, LV_BTNMATRIX_CTRL_CHECKED)) {
                   team = "Red";
@@ -223,9 +239,9 @@ static void create_auton_sel_screen() {
     auton_sel_screen = lv_obj_create(NULL);
 
     auton_btnm = lv_btnmatrix_create(auton_sel_screen);
-    lv_obj_set_size(auton_btnm, 400, 170);
+    lv_obj_set_size(auton_btnm, 460, 180);
     lv_btnmatrix_set_map(auton_btnm, auton_sel_map);
-    lv_obj_align(auton_btnm, LV_ALIGN_CENTER, 0, -30);
+    lv_obj_align(auton_btnm, LV_ALIGN_CENTER, 0, -12);
     lv_obj_add_event_cb(auton_btnm, event_handler, LV_EVENT_ALL, NULL);
 
     auton_coordinates_label = lv_label_create(auton_sel_screen);
@@ -236,7 +252,7 @@ static void create_match_sel_screen() {
     match_sel_screen = lv_obj_create(NULL);
 
     match_btnm = lv_btnmatrix_create(match_sel_screen);
-    lv_obj_set_size(match_btnm, 400, 170);
+    lv_obj_set_size(match_btnm, 460, 170);
     lv_btnmatrix_set_map(match_btnm, match_sel_map);
 
     // Make first 5 buttons checkable
@@ -244,14 +260,14 @@ static void create_match_sel_screen() {
         lv_btnmatrix_set_btn_ctrl(match_btnm, i, LV_BTNMATRIX_CTRL_CHECKABLE);
     }
 
-    lv_obj_align(match_btnm, LV_ALIGN_TOP_MID, 0, 20);
+    lv_obj_align(match_btnm, LV_ALIGN_TOP_MID, 0, 18);
     lv_obj_add_event_cb(match_btnm, event_handler, LV_EVENT_ALL, NULL);
 
     lv_obj_t * confirm_btn = lv_btn_create(match_sel_screen);
     lv_obj_t * confirm_btn_label = lv_label_create(confirm_btn);
     lv_label_set_text(confirm_btn_label, "Confirm");
     lv_obj_set_style_bg_color(confirm_btn, lv_palette_main(LV_PALETTE_GREEN), 0);
-    lv_obj_align(confirm_btn, LV_ALIGN_CENTER, 0, 100);
+    lv_obj_align(confirm_btn, LV_ALIGN_CENTER, 125, 95);
     lv_obj_add_event_cb(confirm_btn, event_handler, LV_EVENT_ALL, NULL);
 
     match_coordinates_label = lv_label_create(match_sel_screen);
@@ -265,7 +281,7 @@ void lvgl_display_task_fn(void* param) {
         if (auton_coordinates_label != nullptr && should_update_coordinates) {
             char coord_text[100];
             snprintf(coord_text, sizeof(coord_text),
-                    "X: %.3f\nY: %.3f\nHeading: %.3f°",
+                    "X: %.3f     Y: %.3f     Heading: %.3f°",
                     chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
             lv_label_set_text(auton_coordinates_label, coord_text);
         }
@@ -273,7 +289,7 @@ void lvgl_display_task_fn(void* param) {
         if (match_coordinates_label != nullptr && should_update_coordinates) {
             char coord_text[100];
             snprintf(coord_text, sizeof(coord_text),
-                    "X: %.3f\nY: %.3f\nHeading: %.3f°",
+                    "X: %.3f     Y: %.3f     Heading: %.3f°",
                     chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
             lv_label_set_text(match_coordinates_label, coord_text);
         }
@@ -281,9 +297,50 @@ void lvgl_display_task_fn(void* param) {
         if (confirmation_coordinates_label != nullptr && should_update_coordinates) {
             char coord_text[100];
             snprintf(coord_text, sizeof(coord_text),
-                    "X: %.3f\nY: %.3f\nHeading: %.3f°",
+                    "X: %.3f     Y: %.3f     Heading: %.3f°",
                     chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
             lv_label_set_text(confirmation_coordinates_label, coord_text);
+        }
+        
+        int heading = (int32_t)chassis.getPose().theta;
+
+        if (heading < 0) {
+            heading += 360;
+        }
+
+        if (heading > 360) {
+            heading -= 360;
+        }
+
+        if (meter_initialized) {
+            lv_meter_set_indicator_value(heading_meter, indic, heading);
+        }
+        
+        if (speed_meter_initialized) {
+            // Get current position and time
+            double current_x = chassis.getPose().x;
+            double current_y = chassis.getPose().y;
+            uint32_t current_time = pros::millis();
+            
+            // Calculate distance traveled
+            double dx = fabs(current_x - prev_x);
+            double dy = fabs(current_y - prev_y);
+            double distance = sqrt(dx*dx + dy*dy);
+            
+            
+            // Calculate time elapsed in seconds
+            double dt = (current_time - prev_time) / 1000.0;
+            
+            // Calculate speed in inches per second
+            double speed = (dt > 0) ? (distance / dt) : 0;
+            
+            // Update the speed meter
+            lv_meter_set_indicator_value(speed_meter, speed_indic, (int32_t)speed);
+            
+            // Update previous values
+            prev_x = current_x;
+            prev_y = current_y;
+            prev_time = current_time;
         }
 
         pros::delay(10);
@@ -302,6 +359,37 @@ static void create_confirmation_screen() {
 
     confirmation_coordinates_label = lv_label_create(confirmation_screen);
     lv_obj_align(confirmation_coordinates_label, LV_ALIGN_BOTTOM_LEFT, 10, -10);
+
+    // Create heading meter
+    heading_meter = lv_meter_create(confirmation_screen);
+    lv_obj_align(heading_meter, LV_ALIGN_LEFT_MID, 30, -20);
+    lv_meter_scale_t * heading_scale = lv_meter_add_scale(heading_meter);
+    indic = lv_meter_add_needle_line(heading_meter, heading_scale, 4, lv_palette_main(LV_PALETTE_RED), -10);
+    lv_meter_set_scale_range(heading_meter, heading_scale, 0, 360, 360, 270);
+    meter_initialized = true;
+
+    lv_obj_t * heading_label = lv_label_create(heading_meter);
+    lv_label_set_text(heading_label, "Heading");
+    lv_obj_align(heading_label, LV_ALIGN_LEFT_MID, 15, 50);
+
+    // Create speed meter
+    speed_meter = lv_meter_create(confirmation_screen);
+    lv_obj_align(speed_meter, LV_ALIGN_RIGHT_MID, -30, -20);
+    lv_meter_scale_t * speed_scale = lv_meter_add_scale(speed_meter);
+    speed_indic = lv_meter_add_needle_line(speed_meter, speed_scale, 4, lv_palette_main(LV_PALETTE_RED), -10);
+    lv_meter_set_scale_range(speed_meter, speed_scale, 0, 50, 150, 300); 
+
+    lv_obj_t * speed_label = lv_label_create(speed_meter);
+    lv_label_set_text(speed_label, "Speed");
+    lv_obj_align(speed_label, LV_ALIGN_RIGHT_MID, -30, 50);
+    
+    
+    // Initialize speed tracking variables
+    prev_x = chassis.getPose().x;
+    prev_y = chassis.getPose().y;
+    prev_time = pros::millis();
+    
+    speed_meter_initialized = true;
 }
 
 void initialize_display() {
@@ -328,16 +416,11 @@ void initialize() {
     chassis.turnToHeading(90,3000);
     chassis.moveToPoint(0, 24, 3000);
 
-    while(1) {
-        pros::lcd::print(1, "%f Heading", chassis.getPose().theta);
-        pros::lcd::print(2, "%f X Coordinate", chassis.getPose().x);
-        pros::lcd::print(3, "%f Y Coordinate", chassis.getPose().y);
-        pros::delay(500);
-    }
-    */
+    
 
     // Intialize brake mode & postitions
-    intake.set_brake_mode(pros::MotorBrake::coast);
+    s1.set_brake_mode(pros::MotorBrake::coast);
+    s2.set_brake_mode(pros::MotorBrake::coast);
     stakemech.set_brake_mode(pros::MotorBrake::hold);
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
@@ -419,18 +502,21 @@ void autonomous() {
     pros::delay(300);
     chassis.turnToHeading(130, 1000); //async??
     pros::delay(300);
-    intake.move(127);
+    s1.move(127);
+    s2.move(127);
     chassis.moveToPoint(14, -45, 2000, {.maxSpeed=70});
     chassis.swingToHeading(90, DriveSide::RIGHT, 1500, {AngularDirection::CCW_COUNTERCLOCKWISE});
     chassis.moveToPoint(34, -47, 2000, {.maxSpeed=70});
     chassis.turnToHeading(-30, 1500);
     chassis.moveToPoint(28, -30, 3000); //intake but dont score 4th ring
-    intake.brake(); 
+    s1.brake(); 
+    s2.brake();
     mogomech.extend(); //release mogo mech 
     chassis.moveToPoint(-24, 8, 3000);
     chassis.turnToHeading(180, 1500);
     chassis.moveToPoint(-36, 14, 3000, {.forwards=false, .maxSpeed=50}, false); 
-    intake.move(127); //score alliance stake 
+    s1.move(127); //score alliance stake 
+    s2.move(127);
     pros::delay(500);
     chassis.moveToPoint(-24, -34, 2000);
     //engage stakemech to touch pole
@@ -458,21 +544,23 @@ void opcontrol() {
 
         // intake
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-            intake.move(127);
+            s1.move(100);
+            s2.move(95);
         } else {
-            intake.move(0);
+            s1.move(0);
+            s2.move(0);
         }
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-            intake.move(-100);
+            s1.move(-95);
+            s2.move(-100);
         }
         // lady brown
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // set
             stakemech.move_absolute(480, 90); 
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)){ // move up
-            stakemech.move(100);
+            doinker.toggle();
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { // move down
-            stakemech.move(-127);
-            stakemech.set_zero_position(0);
+            stakemech.move_absolute(-470, 90);
         } else {
             stakemech.move(0);
         }
