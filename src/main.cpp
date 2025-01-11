@@ -32,15 +32,13 @@ pros::Rotation verticalEnc(20);                                                 
 pros::Rotation horizontalEnc(-18);                                                  // horitontal rotational sensor
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, -0.5); // vertical tracking wheel
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -5.5);       // horizontal tracking wheel
-pros::adi::Potentiometer programSelector(3);
 
 // MOTORS
 pros::MotorGroup leftMotors({-19, -3, 2}, pros::MotorGearset::blue);                      // front, top, bottom (left)
 pros::MotorGroup rightMotors({11, 9, -8}, pros::MotorGearset::blue);                      // front, top, bottom (right)
-pros::Motor s1(15, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // s1
-pros::Motor s2(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // s2
-pros::Motor stakemech(-12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
-pros::Motor stageOneIntake(15, pros::MotorGears::green, pros::v5::MotorUnits::rotations);         // s1 intake
+pros::Motor stage1(15, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // stage1
+pros::Motor stage2(1, pros::MotorGears::blue, pros::v5::MotorUnits::rotations);           // stage2
+pros::Motor stakemech(12, pros::MotorGears::green, pros::v5::MotorEncoderUnits::counts); // lady brown
 
 // PNEUMATICS
 pros::adi::Pneumatics mogomech(1, true); // mobile goal mech
@@ -48,7 +46,7 @@ pros::adi::Pneumatics doinker(2, false); // doinker mech
 pros::adi::Pneumatics intakeLift(3, false); // intake lift 
 
 // DRIVETRAIN SETTINGS
-lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 11.25, lemlib::Omniwheel::NEW_325, 360, 8);
+lemlib::Drivetrain drivetrain(&leftMotors, &rightMotors, 11.25, lemlib::Omniwheel::NEW_325, 450, 8);
 
 // LATERAL PID CONTROLLER
 lemlib::ControllerSettings linearController(8.5,  // proportional gain (kP)
@@ -406,39 +404,38 @@ void initialize_display() {
 }
 
 
-// const int numStates = 3;
-// //make sure these are in centidegrees (1 degree = 100 centidegrees)
-// int states[numStates] = {0, 300, 2000};
-// int currState = 0;
-// int target = 0;
+const int numStates = 3;
+//make sure these are in centidegrees (1 degree = 100 centidegrees)
+int states[numStates] = {0, 325, 2000};
+int currState = 0;
+int target = 0;
 
-// void nextState() {
-//     currState += 1;
-//     if (currState == numStates) {
-//         currState = 0;
-//     }
-//     target = states[currState];
-// }
+void nextState() {
+    currState += 1;
+    if (currState == numStates) {
+        currState = 0;
+    }
+    target = states[currState];
+}
 
-// void liftControl() {
-//     double kp = 0.5;
-//     double error = target - rotationSensor.get_position();
-//     double velocity = kp * error;
-//     lb.move(velocity);
-// }
+void liftControl() {
+    double kp = 1;
+    double error = target - stakemech.get_position();
+    double velocity = kp * error;
+    stakemech.move(velocity);
+}
 
 void initialize() {
     chassis.calibrate();
-    
     initialize_display();
 
-    // pros::Task liftControlTask([]{
-    //     while (true) {
-    //         liftControl();
-    //         pros::delay(10);
-    //     }
-    // });
-    
+    pros::Task liftControlTask([]{
+        while (true) {
+            liftControl();
+            pros::delay(10);
+        }
+    });
+
     
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
@@ -446,11 +443,9 @@ void initialize() {
     chassis.moveToPoint(0, 24, 3000);
     */
 
-
-
     // Intialize brake mode & postitions
-    s1.set_brake_mode(pros::MotorBrake::coast);
-    s2.set_brake_mode(pros::MotorBrake::coast);
+    stage1.set_brake_mode(pros::MotorBrake::coast);
+    stage2.set_brake_mode(pros::MotorBrake::coast);
     stakemech.set_brake_mode(pros::MotorBrake::hold);
     leftMotors.set_brake_mode_all(pros::MotorBrake::coast);
     rightMotors.set_brake_mode_all(pros::MotorBrake::coast);
@@ -459,9 +454,6 @@ void initialize() {
 }
 
 void autonomous() {
-
-
-
     if (strcmp(auton_sel, "Match Auton") == 0) {
 
         if (team == nullptr || side == nullptr || wp == nullptr) {
@@ -483,6 +475,28 @@ void autonomous() {
                 if (strcmp(wp, "Yes") == 0) {
                     
                     // RED RING SIDE WITH WIN POINT
+                    chassis.setPose(0, 0 , 0);
+                    mogomech.extend();
+                    chassis.moveToPoint(0, -32, 3000, {.forwards=false, .maxSpeed=70}, false);
+                    mogomech.retract(); //clamp mogo #1
+                    pros::delay(300);
+                    chassis.turnToHeading(130, 1000); //async??
+                    pros::delay(300);
+                    stage1.move(127);
+                    chassis.moveToPoint(11, -42, 2000, {.maxSpeed=70});
+                    chassis.swingToHeading(90, DriveSide::RIGHT, 1500, {AngularDirection::CCW_COUNTERCLOCKWISE});
+                    chassis.moveToPoint(31, -47, 2000, {.maxSpeed=70});
+                    chassis.swingToHeading(-30, DriveSide::LEFT, 1500);
+                    chassis.moveToPoint(28, -30, 3000, {}, true); //intake but dont score 4th ring
+                    stage1.brake(); 
+                    mogomech.extend(); //release mogo mech 
+                    chassis.moveToPoint(-24, 8, 3000);
+                    chassis.turnToHeading(180, 1500);
+                    chassis.moveToPoint(-33, 18, 3000, {.forwards=false, .maxSpeed=50}, false); 
+                    stage1.move(127); //score alliance stake 
+                    pros::delay(500);
+                    chassis.moveToPoint(-24, -34, 2000);
+                    //engage stakemech to touch pole
 
                 } else {
 
@@ -518,52 +532,19 @@ void autonomous() {
         // SKILLS AUTON
 
     }
-
-
-
-
-
-
-    //red ring
-    chassis.setPose(0, 0 , 0);
-    mogomech.extend();
-    chassis.moveToPoint(0, -32, 3000, {.forwards=false, .maxSpeed=70});
-    mogomech.retract(); //clamp mogo #1
-    pros::delay(300);
-    chassis.turnToHeading(130, 1000); //async??
-    pros::delay(300);
-    s1.move(127);
-    s2.move(127);
-    chassis.moveToPoint(14, -45, 2000, {.maxSpeed=70});
-    chassis.swingToHeading(90, DriveSide::RIGHT, 1500, {AngularDirection::CCW_COUNTERCLOCKWISE});
-    chassis.moveToPoint(34, -47, 2000, {.maxSpeed=70});
-    chassis.turnToHeading(-30, 1500);
-    chassis.moveToPoint(28, -30, 3000); //intake but dont score 4th ring
-    s1.brake(); 
-    s2.brake();
-    mogomech.extend(); //release mogo mech 
-    chassis.moveToPoint(-24, 8, 3000);
-    chassis.turnToHeading(180, 1500);
-    chassis.moveToPoint(-36, 14, 3000, {.forwards=false, .maxSpeed=50}, false); 
-    s1.move(127); //score alliance stake 
-    s2.move(127);
-    pros::delay(500);
-    chassis.moveToPoint(-24, -34, 2000);
-    //engage stakemech to touch pole
 }
 
 // DRIVER CODE UPDATED & FINISHED FOR SUPERNOVA 11/8/24
 void opcontrol() {
     /*
-    L1 - mogo
-    L2 - set lady brown (hold)
-    R1 - intake up
-    R2 - intake down
-    Left Arrow - doinker
-    Right Arrow - score lady brown
-    Y - down lady brown
+    Mogomech - L1
+    Lady brown - L2
+    Intake - R1 (in), R2 (out), (raise)
+    Doinker - Right Arrow
+    Drivetrain - left/right joysticks
     */
 
+    bool stakeMechSet = false;
     bool last_L1_state = false;
     while (true)
     {
@@ -574,24 +555,22 @@ void opcontrol() {
 
         // intake
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-            s1.move(100);
-            s2.move(95);
+            stage1.move(100);
+            stage2.move(95);
         } else {
-            s1.move(0);
-            s2.move(0);
+            stage1.move(0);
+            stage2.move(0);
         }
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-            s1.move(-95);
-            s2.move(-100);
+            stage1.move(-95);
+            stage2.move(-100);
         }
         // lady brown
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // set
-            stakemech.move_absolute(480, 90); 
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)){ // move up
-            doinker.toggle();
-        } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { // move down
             nextState();
+            pros::delay(200);
         }
+        
         // mogomech
         bool current_L1_state = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
         if (current_L1_state && !last_L1_state) {
@@ -599,9 +578,14 @@ void opcontrol() {
         }
         last_L1_state = current_L1_state;
         // doinker
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
             doinker.toggle();
-            pros::delay(300);
+            pros::delay(200);
+        }
+        //lifted intake
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+            intakeLift.toggle();
+            pros::delay(200);
         }
 
         pros::delay(25); //controller debounce delay
