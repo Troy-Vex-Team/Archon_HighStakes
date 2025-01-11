@@ -364,24 +364,24 @@ static void create_confirmation_screen() {
     heading_meter = lv_meter_create(confirmation_screen);
     lv_obj_align(heading_meter, LV_ALIGN_LEFT_MID, 30, -20);
     lv_meter_scale_t * heading_scale = lv_meter_add_scale(heading_meter);
-    indic = lv_meter_add_needle_line(heading_meter, heading_scale, 4, lv_palette_main(LV_PALETTE_RED), -10);
+    indic = lv_meter_add_needle_line(heading_meter, heading_scale, 4, lv_palette_main(LV_PALETTE_RED), 0);
     lv_meter_set_scale_range(heading_meter, heading_scale, 0, 360, 360, 270);
     meter_initialized = true;
 
     lv_obj_t * heading_label = lv_label_create(heading_meter);
     lv_label_set_text(heading_label, "Heading");
-    lv_obj_align(heading_label, LV_ALIGN_LEFT_MID, 15, 50);
+    lv_obj_align(heading_label, LV_ALIGN_LEFT_MID, 15, 45);
 
     // Create speed meter
     speed_meter = lv_meter_create(confirmation_screen);
     lv_obj_align(speed_meter, LV_ALIGN_RIGHT_MID, -30, -20);
     lv_meter_scale_t * speed_scale = lv_meter_add_scale(speed_meter);
-    speed_indic = lv_meter_add_needle_line(speed_meter, speed_scale, 4, lv_palette_main(LV_PALETTE_RED), -10);
-    lv_meter_set_scale_range(speed_meter, speed_scale, 0, 50, 150, 300); 
+    speed_indic = lv_meter_add_needle_line(speed_meter, speed_scale, 4, lv_palette_main(LV_PALETTE_RED), 0);
+    lv_meter_set_scale_range(speed_meter, speed_scale, 0, 50, 150, 270); 
 
     lv_obj_t * speed_label = lv_label_create(speed_meter);
     lv_label_set_text(speed_label, "Speed");
-    lv_obj_align(speed_label, LV_ALIGN_RIGHT_MID, -30, 50);
+    lv_obj_align(speed_label, LV_ALIGN_RIGHT_MID, -20, 45);
     
     
     // Initialize speed tracking variables
@@ -405,18 +405,48 @@ void initialize_display() {
     pros::Task lvgl_task(lvgl_display_task_fn, nullptr, "LVGL Task");
 }
 
+
+const int numStates = 3;
+//make sure these are in centidegrees (1 degree = 100 centidegrees)
+int states[numStates] = {0, 300, 2000};
+int currState = 0;
+int target = 0;
+
+void nextState() {
+    currState += 1;
+    if (currState == numStates) {
+        currState = 0;
+    }
+    target = states[currState];
+}
+
+void liftControl() {
+    double kp = 0.5;
+    double error = target - rotationSensor.get_position();
+    double velocity = kp * error;
+    lb.move(velocity);
+}
+
 void initialize() {
     chassis.calibrate();
     
     initialize_display();
+
+    pros::Task liftControlTask([]{
+        while (true) {
+            liftControl();
+            pros::delay(10);
+        }
+    });
     
     
     /*PID Tuning Setup
     chassis.setPose(0,0,0); // coordinates + heading to 0
     chassis.turnToHeading(90,3000);
     chassis.moveToPoint(0, 24, 3000);
+    */
 
-    
+
 
     // Intialize brake mode & postitions
     s1.set_brake_mode(pros::MotorBrake::coast);
@@ -560,9 +590,7 @@ void opcontrol() {
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)){ // move up
             doinker.toggle();
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) { // move down
-            stakemech.move_absolute(-470, 90);
-        } else {
-            stakemech.move(0);
+            nextState();
         }
         // mogomech
         bool current_L1_state = controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
